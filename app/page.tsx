@@ -14,6 +14,70 @@ const suggestions = [
   'What evidence supports cool-roof programmes?',
 ];
 
+type PolicyAnswer = {
+  heading: string;
+  body: string;
+  citations: string[];
+  confidence: string;
+  supported: boolean;
+};
+
+const recentChats = [
+  { id: 'heat', title: 'Heat resilience priorities', time: '12 min ago', question: 'Which districts should we prioritise for heat adaptation funding, and why?' },
+  { id: 'coastal', title: 'Coastal district comparison', time: 'Yesterday', question: 'Which coastal districts need adaptation support most urgently?' },
+  { id: 'fy27', title: 'FY27 programme options', time: '3 days ago', question: 'How should we structure the FY27 adaptation funding programme?' },
+];
+
+function answerForPrompt(question: string): PolicyAnswer {
+  const query = question.toLowerCase();
+
+  if (query.includes('cool roof') || query.includes('cool-roof')) {
+    return {
+      heading: 'The strongest evidence supports targeted cool-roof programmes, not universal roll-out.',
+      body: 'The programme brief shows the clearest near-term case in dense, low-income neighbourhoods with high night-time heat retention. Start with public buildings and informal-settlement clusters, require pre-installation roof surveys, and measure indoor temperature reduction before expansion.',
+      citations: ['1', '3'], confidence: 'High confidence · 2 directly supporting sources', supported: true,
+    };
+  }
+
+  if (query.includes('coast') || query.includes('flood') || query.includes('cyclone')) {
+    return {
+      heading: 'Prioritise Odisha’s delta districts for near-term coastal adaptation support.',
+      body: 'The available demo evidence points to the largest combined gap in exposure, vulnerable population and delivery capacity around Kendrapara and Jagatsinghpur. Sequence funding from early-warning coverage and resilient public facilities to longer-horizon drainage and shoreline measures.',
+      citations: ['1', '2'], confidence: 'Moderate confidence · evidence years differ', supported: true,
+    };
+  }
+
+  if (query.includes('fy27') || query.includes('budget') || query.includes('funding programme') || query.includes('allocate')) {
+    return {
+      heading: 'Use a two-stage FY27 allocation tied to both need and delivery milestones.',
+      body: 'Reserve 60% of funding for risk-weighted population and 40% for implementation readiness. Release an initial planning tranche first, then unlock capital funding when districts verify target populations, responsible agencies and measurable twelve-month outcomes.',
+      citations: ['2', '3'], confidence: 'High confidence · policy and programme sources agree', supported: true,
+    };
+  }
+
+  if (query.includes('readiness') || query.includes('compare') || query.includes('state')) {
+    return {
+      heading: 'Gujarat leads on implementation readiness; Odisha shows the largest near-term opportunity.',
+      body: 'Gujarat benefits from established heat-action governance and scalable pilots. Odisha has strong planning foundations but wider last-mile coverage gaps. Maharashtra sits between them: programme capacity is credible, though neighbourhood-level targeting needs improvement.',
+      citations: ['2', '3'], confidence: 'Moderate confidence · 2 comparable sources', supported: true,
+    };
+  }
+
+  if (query.includes('heat') || query.includes('district') || query.includes('priority') || query.includes('ahmedabad') || query.includes('nagpur')) {
+    return {
+      heading: 'Ahmedabad has the strongest immediate case, followed by Nagpur and Bhubaneswar.',
+      body: 'Ahmedabad combines the largest exposed population with an implementation platform that can scale now. Nagpur has the widest programme-coverage gap, while Bhubaneswar faces the sharpest projected warming signal. Apply equity safeguards before final allocations.',
+      citations: ['1', '2', '3'], confidence: 'High confidence · 3 source types agree', supported: true,
+    };
+  }
+
+  return {
+    heading: 'The current demo evidence cannot answer this reliably.',
+    body: 'This prototype is grounded only in the three displayed demo sources, covering heat exposure, a state heat-action plan and an urban cooling programme. Add a relevant source or reframe the question around heat risk, adaptation readiness, cool roofs, coastal priorities or programme funding.',
+    citations: [], confidence: 'Evidence limit · no supported claim', supported: false,
+  };
+}
+
 export default function Home() {
   const [prompt, setPrompt] = useState('');
   const [followUp, setFollowUp] = useState('');
@@ -21,12 +85,18 @@ export default function Home() {
   const [traceOpen, setTraceOpen] = useState(false);
   const [evidenceOpen, setEvidenceOpen] = useState(true);
   const [isNewChat, setIsNewChat] = useState(false);
+  const [activeTitle, setActiveTitle] = useState('Heat resilience priorities');
+  const [activeRecent, setActiveRecent] = useState<string | null>('heat');
+  const [currentAnswer, setCurrentAnswer] = useState<PolicyAnswer>(() => answerForPrompt('heat priorities'));
 
   function askQuestion(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const nextPrompt = prompt.trim();
     if (!nextPrompt) return;
     setFollowUp(nextPrompt);
+    setCurrentAnswer(answerForPrompt(nextPrompt));
+    setActiveTitle(nextPrompt.length > 42 ? `${nextPrompt.slice(0, 42)}…` : nextPrompt);
+    setActiveRecent(null);
     setPrompt('');
     setIsThinking(true);
     window.setTimeout(() => setIsThinking(false), 850);
@@ -43,8 +113,31 @@ export default function Home() {
     setPrompt('');
     setIsThinking(false);
     setTraceOpen(false);
+    setActiveTitle('New policy question');
+    setActiveRecent(null);
     window.setTimeout(() => document.querySelector<HTMLTextAreaElement>('.composer textarea')?.focus(), 0);
   }
+
+  function openRecentChat(chat: (typeof recentChats)[number]) {
+    setActiveRecent(chat.id);
+    setActiveTitle(chat.title);
+    setPrompt('');
+    setIsThinking(false);
+    setTraceOpen(false);
+    if (chat.id === 'heat') {
+      setIsNewChat(false);
+      setFollowUp('');
+    } else {
+      setIsNewChat(true);
+      setFollowUp(chat.question);
+      setCurrentAnswer(answerForPrompt(chat.question));
+    }
+    document.getElementById('conversation')?.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  const hasSupportedAnswer = !followUp || currentAnswer.supported;
+  const citedSourceCount = followUp ? currentAnswer.citations.length : 3;
+  const coveragePercent = hasSupportedAnswer ? (citedSourceCount === 3 ? 92 : 84) : 0;
 
   return (
     <main className="app-shell">
@@ -60,9 +153,11 @@ export default function Home() {
           <a className="nav-item" href="#sources"><span className="nav-icon">▤</span> Evidence library <span className="count">18</span></a>
           <a className="nav-item" href="#briefs"><span className="nav-icon">□</span> Saved briefs</a>
           <p className="nav-label recent-label">Recent</p>
-          <a className="recent-item" href="#conversation">Heat resilience priorities<small>12 min ago</small></a>
-          <a className="recent-item" href="#conversation">Coastal district comparison<small>Yesterday</small></a>
-          <a className="recent-item" href="#conversation">FY27 programme options<small>3 days ago</small></a>
+          {recentChats.map((chat) => (
+            <button className={`recent-item ${activeRecent === chat.id ? 'selected' : ''}`} type="button" key={chat.id} onClick={() => openRecentChat(chat)}>
+              {chat.title}<small>{chat.time}</small>
+            </button>
+          ))}
         </nav>
         <div className="sidebar-footer">
           <div className="profile-avatar">AR</div>
@@ -73,7 +168,7 @@ export default function Home() {
 
       <section className="workspace" id="conversation">
         <header className="topbar">
-          <div><p>Policy workspace</p><h1>{isNewChat ? 'New policy question' : 'Heat resilience priorities'}</h1></div>
+          <div><p>Policy workspace</p><h1>{activeTitle}</h1></div>
           <div className="topbar-actions">
             <span className="demo-badge">Demo evidence</span>
             <span className="live-badge"><i /> Data updated Jun 2025</span>
@@ -148,9 +243,9 @@ export default function Home() {
                   ) : (
                     <div>
                       <p className="message-meta">AdapT insight <span>Just now</span></p>
-                      <h3>Programme readiness should temper the risk ranking.</h3>
-                      <p>Use the priority score as a starting point, then release funds against verified delivery milestones. Ahmedabad can scale its existing heat-action infrastructure immediately; Nagpur needs a coverage plan for informal settlements; Bhubaneswar should link cooling investments to its 2040 urban plan. <a href="#source-2">[2]</a> <a href="#source-3">[3]</a></p>
-                      <small><i /> High confidence · 2 directly supporting sources</small>
+                      <h3>{currentAnswer.heading}</h3>
+                      <p>{currentAnswer.body} {currentAnswer.citations.map((citation) => <a href={`#source-${citation}`} key={citation}>[{citation}] </a>)}</p>
+                      <small className={currentAnswer.supported ? '' : 'evidence-limit'}><i /> {currentAnswer.confidence}</small>
                     </div>
                   )}
                 </div>
@@ -169,10 +264,10 @@ export default function Home() {
           </div>
 
           <aside className={`evidence-panel ${evidenceOpen ? '' : 'collapsed'}`} id="sources">
-            <div className="evidence-header"><div><p>Evidence</p><span>3 cited sources</span></div><button type="button" aria-label={evidenceOpen ? 'Close evidence panel' : 'Open evidence panel'} onClick={() => setEvidenceOpen(!evidenceOpen)}>{evidenceOpen ? '×' : '‹'}</button></div>
+            <div className="evidence-header"><div><p>Evidence</p><span>{citedSourceCount} cited {citedSourceCount === 1 ? 'source' : 'sources'}</span></div><button type="button" aria-label={evidenceOpen ? 'Close evidence panel' : 'Open evidence panel'} onClick={() => setEvidenceOpen(!evidenceOpen)}>{evidenceOpen ? '×' : '‹'}</button></div>
             <div className="evidence-body">
-              <div className="coverage-card"><div className="coverage-ring"><span>92<small>%</small></span></div><div><strong>Strong coverage</strong><p>17 of 18 claims are directly supported.</p></div></div>
-              <p className="panel-label">Cited in this answer</p>
+              <div className={`coverage-card ${hasSupportedAnswer ? '' : 'coverage-gap'}`}><div className="coverage-ring" style={{ background: `conic-gradient(${hasSupportedAnswer ? '#337657' : '#c4933b'} 0 ${coveragePercent}%, #dbe9e0 ${coveragePercent}% 100%)` }}><span>{coveragePercent}<small>%</small></span></div><div><strong>{hasSupportedAnswer ? 'Strong coverage' : 'Evidence gap'}</strong><p>{hasSupportedAnswer ? 'Key claims are directly supported.' : 'No current source supports this question.'}</p></div></div>
+              <p className="panel-label">{hasSupportedAnswer ? 'Cited in this answer' : 'Available demo sources'}</p>
               <div className="source-list">
                 {sources.map((source) => (
                   <article className="source-card" id={`source-${source.id}`} key={source.id}>
