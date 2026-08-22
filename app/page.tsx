@@ -20,6 +20,7 @@ export default function Home() {
   const [isThinking, setIsThinking] = useState(false);
   const [traceOpen, setTraceOpen] = useState(false);
   const [evidenceOpen, setEvidenceOpen] = useState(true);
+  const [isNewChat, setIsNewChat] = useState(false);
 
   function askQuestion(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -36,6 +37,15 @@ export default function Home() {
     window.setTimeout(() => document.querySelector<HTMLTextAreaElement>('.composer textarea')?.focus(), 0);
   }
 
+  function startNewChat() {
+    setIsNewChat(true);
+    setFollowUp('');
+    setPrompt('');
+    setIsThinking(false);
+    setTraceOpen(false);
+    window.setTimeout(() => document.querySelector<HTMLTextAreaElement>('.composer textarea')?.focus(), 0);
+  }
+
   return (
     <main className="app-shell">
       <aside className="sidebar">
@@ -43,7 +53,7 @@ export default function Home() {
           <div className="brand-mark" aria-hidden="true"><span /><span /><span /></div>
           <div><strong>AdapT</strong><small>Policy intelligence</small></div>
         </div>
-        <button className="new-brief" type="button"><span>＋</span> New policy brief</button>
+        <button className="new-brief" type="button" onClick={startNewChat}><span>＋</span> New conversation</button>
         <nav aria-label="Primary navigation">
           <p className="nav-label">Workspace</p>
           <a className="nav-item active" href="#conversation"><span className="nav-icon">⌁</span> Ask AdapT</a>
@@ -63,7 +73,7 @@ export default function Home() {
 
       <section className="workspace" id="conversation">
         <header className="topbar">
-          <div><p>Policy workspace</p><h1>Heat resilience priorities</h1></div>
+          <div><p>Policy workspace</p><h1>{isNewChat ? 'New policy question' : 'Heat resilience priorities'}</h1></div>
           <div className="topbar-actions">
             <span className="demo-badge">Demo evidence</span>
             <span className="live-badge"><i /> Data updated Jun 2025</span>
@@ -74,12 +84,13 @@ export default function Home() {
 
         <div className={`conversation-wrap ${evidenceOpen ? '' : 'evidence-collapsed'}`}>
           <div className="conversation">
-            <div className="user-message">
-              <div className="message-avatar">AR</div>
-              <div><p className="message-meta">You <span>10:42 AM</span></p><p>Which districts should we prioritise for heat adaptation funding, and why?</p></div>
-            </div>
+            {!isNewChat && <>
+              <div className="user-message">
+                <div className="message-avatar">AR</div>
+                <div><p className="message-meta">You <span>10:42 AM</span></p><p>Which districts should we prioritise for heat adaptation funding, and why?</p></div>
+              </div>
 
-            <article className="answer-card">
+              <article className="answer-card">
               <div className="answer-head">
                 <div className="adapt-avatar">A</div>
                 <div><p className="message-meta">AdapT insight <span>10:42 AM</span></p><small>Analysed 18 sources across 6 indicators</small></div>
@@ -115,7 +126,17 @@ export default function Home() {
                 <button type="button">▣&nbsp; Add to brief</button><button type="button">⇩&nbsp; Export table</button><span />
                 <button className="reaction" type="button" aria-label="Helpful">♡</button><button className="reaction" type="button" aria-label="Copy answer">▢</button>
               </div>
-            </article>
+              </article>
+            </>}
+
+            {isNewChat && !followUp && (
+              <section className="empty-chat">
+                <div className="empty-chat-mark">A</div>
+                <p>New conversation</p>
+                <h2>What policy decision are you working through?</h2>
+                <span>Ask about priorities, compare places, or test a programme option against the available evidence.</span>
+              </section>
+            )}
 
             {followUp && (
               <div className="follow-up-thread" aria-live="polite">
