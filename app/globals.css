@@ -43,3 +43,4 @@ button,textarea { font:inherit; } button,a { -webkit-tap-highlight-color:transpa
 @media(max-width:620px){.empty-chat{margin:42px auto 40px;padding:0 12px}.empty-chat h2{font-size:23px}.follow-up-answer{margin-left:0}.demo-badge{display:none}}
 @media(max-width:620px){.dynamic-priority-grid{grid-template-columns:1fr}.source-dialog-backdrop{padding:12px}.source-dialog{padding:18px;border-radius:12px}.source-dialog blockquote{font-size:12px}.follow-up-answer{grid-template-columns:30px 1fr;padding:14px}.follow-up-answer .priority-card{grid-template-columns:1fr auto}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+.source-card>a{border:0;background:transparent;color:#47745f;cursor:pointer;text-decoration:none;font-weight:700}.source-card>a:hover{color:#174f39}

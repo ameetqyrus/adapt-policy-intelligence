@@ -8,7 +8,7 @@ const lora = Lora({ variable: '--font-lora', subsets: ['latin'] });
 export const metadata: Metadata = {
   metadataBase: new URL('https://adapt-policy-intelligence.amitonquest.chatgpt.site'),
   title: 'AdapT — Policy Intelligence',
-  description: 'Evidence-grounded climate adaptation intelligence for public policy decisions.',
+  description: 'Source-grounded intelligence for U.S. state and local policy decisions.',
   openGraph: {
     title: 'AdapT — Policy Intelligence',
     description: 'Policy intelligence, grounded in evidence.',

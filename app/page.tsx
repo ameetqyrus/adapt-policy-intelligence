@@ -2,386 +2,174 @@
 
 import { FormEvent, useState } from 'react';
 
-const sources = [
-  { id: '1', type: 'AdapT indicator', title: 'Heat exposure risk', detail: 'District scorecard · 2024', color: 'amber', excerpt: 'Ahmedabad records the largest absolute population exposed to high heat risk. Nagpur and Bhubaneswar show faster growth in extreme-heat days and night-time heat retention.', location: 'District profiles · Heat exposure and sensitivity' },
-  { id: '2', type: 'Policy document', title: 'State Heat Action Plan', detail: 'Section 4.2 · May 2024', color: 'blue', excerpt: 'Prioritisation should combine exposure, vulnerable population and delivery readiness. Funding releases should be tied to named agencies, coverage targets and annual review.', location: 'Section 4.2 · Resource allocation' },
-  { id: '3', type: 'Programme data', title: 'Urban Cooling Mission', detail: 'Implementation brief · 2023', color: 'green', excerpt: 'Cool-roof and early-warning pilots can expand within twelve months where roof surveys, municipal delivery teams and community outreach partners are already in place.', location: 'Pages 18–22 · Scale-up conditions' },
-  { id: '4', type: 'Risk atlas', title: 'Coastal vulnerability atlas', detail: 'District profiles · 2024', color: 'blue', excerpt: 'Kendrapara and Jagatsinghpur combine high cyclone exposure, low-lying settlements and infrastructure-service disruption. Early warning and resilient public facilities offer the fastest risk reduction.', location: 'Odisha coast · District comparison' },
-  { id: '5', type: 'Funding guidance', title: 'Climate finance framework', detail: 'FY27 guidance note', color: 'amber', excerpt: 'A needs-based allocation should be paired with a delivery gate. Planning support can precede capital release, but later tranches require verified beneficiaries and measurable outcomes.', location: 'Part 3 · Allocation and disbursement' },
-  { id: '6', type: 'AdapT indicator', title: 'Adaptation readiness index', detail: 'State comparison · 2025', color: 'green', excerpt: 'Gujarat leads on operational capacity and programme continuity. Odisha has strong planning foundations with last-mile coverage gaps; Maharashtra performs near the median across both dimensions.', location: 'State scorecards · Readiness components' },
+type Source = { id: string; type: string; title: string; detail: string; color: 'amber' | 'blue' | 'green'; url: string };
+
+const sources: Source[] = [
+  { id: '1', type: 'Budget analysis', title: 'NASBO Reports & Data', detail: 'State budgets, fiscal surveys and expenditure reports', color: 'green', url: 'https://www.nasbo.org/mainsite/reports-data' },
+  { id: '2', type: 'Finance data', title: 'Urban Institute State & Local Finance Data', detail: 'Query tools built from Census government finance data', color: 'blue', url: 'https://datacatalog.urban.org/dataset/interactive-census-governments-state-local-finance-database' },
+  { id: '3', type: 'Fiscal analysis', title: 'Pew Fiscal 50', detail: 'Indicators and analysis of state fiscal health', color: 'amber', url: 'https://www.pew.org/en/projects/archived-projects/states-fiscal-health' },
+  { id: '4', type: 'Official government data', title: 'Census Government Finances', detail: 'Annual state and local revenue, expenditure and debt data', color: 'green', url: 'https://www.census.gov/programs-surveys/gov-finances.html' },
+  { id: '5', type: 'Legislative tracker', title: 'NCSL Bill Tracking Databases', detail: 'Introduced and enacted legislation across policy topics', color: 'blue', url: 'https://www.ncsl.org/technology-and-communication/ncsl-50-state-searchable-bill-tracking-databases' },
+  { id: '6', type: 'Policy summaries', title: 'Ballotpedia', detail: 'State policy, elections and ballot-measure summaries', color: 'amber', url: 'https://ballotpedia.org/' },
+  { id: '7', type: 'Health policy data', title: 'KFF State Health Policy & Data', detail: 'State health indicators, research and policy tracking', color: 'green', url: 'https://www.kff.org/topic/state-health-policy-data/' },
+  { id: '8', type: 'Education tracker', title: 'Education Commission of the States', detail: 'State education legislation organized by topic', color: 'blue', url: 'https://www.ecs.org/state-legislation-by-topic/' },
+  { id: '9', type: 'Official legal text', title: 'California Legislative Information', detail: 'Example official state bill and statute portal', color: 'green', url: 'https://leginfo.legislature.ca.gov/' },
+  { id: '10', type: 'Secondary legal lookup', title: 'Justia State Codes', detail: 'Free state-code discovery across jurisdictions', color: 'blue', url: 'https://law.justia.com/codes/' },
+  { id: '11', type: 'Secondary legal lookup', title: 'FindLaw State Laws', detail: 'Aggregated state statutes and legal summaries', color: 'amber', url: 'https://codes.findlaw.com/' },
+  { id: '12', type: 'Bill tracking', title: 'LegiScan', detail: 'Cross-state bill tracking and legislative data', color: 'blue', url: 'https://legiscan.com/' },
+  { id: '13', type: 'Local ordinance library', title: 'Municode Library', detail: 'City and county codes; verify currency with the jurisdiction', color: 'green', url: 'https://library.municode.com/' },
+  { id: '14', type: 'Local ordinance library', title: 'American Legal Code Library', detail: 'Municipal codes organized by state and jurisdiction', color: 'amber', url: 'https://codelibrary.amlegal.com/' },
+  { id: '15', type: 'Official state budgets', title: 'NASBO Proposed & Enacted Budgets', detail: 'Links to each state’s current official budget materials', color: 'green', url: 'https://www.nasbo.org/mainsite/resources/proposed-enacted-budgets' },
 ];
 
-const suggestions = [
-  'Which districts need heat-action funding first?',
-  'Compare adaptation readiness across states',
-  'What evidence supports cool-roof programmes?',
+const suggestions = ['How should I compare state fiscal capacity?', 'Where can I track Medicaid policy changes?', 'How do I verify a local ordinance?'];
+const recentChats = [
+  { id: 'fiscal', title: 'State fiscal capacity', time: '12 min ago', question: 'Which sources should we use to assess whether a state can afford a new policy?' },
+  { id: 'health', title: 'Medicaid policy landscape', time: 'Yesterday', question: 'How should I research recent state Medicaid policy changes?' },
+  { id: 'local', title: 'Local ordinance check', time: '3 days ago', question: 'How do I find and verify a city or county ordinance?' },
 ];
 
 type PolicyAnswer = {
-  heading: string;
-  body: string;
-  citations: string[];
-  confidence: string;
-  supported: boolean;
+  heading: string; body: string; citations: string[]; status: string; supported: boolean;
   metrics: Array<{ rank: string; label: string; value: string; caption: string; detail: string; source: string; bar: number }>;
   reasons: Array<{ label: string; text: string; source: string }>;
   recommendation: string;
 };
 
-const recentChats = [
-  { id: 'heat', title: 'Heat resilience priorities', time: '12 min ago', question: 'Which districts should we prioritise for heat adaptation funding, and why?' },
-  { id: 'coastal', title: 'Coastal district comparison', time: 'Yesterday', question: 'Which coastal districts need adaptation support most urgently?' },
-  { id: 'fy27', title: 'FY27 programme options', time: '3 days ago', question: 'How should we structure the FY27 adaptation funding programme?' },
-];
+const metric = (rank: string, label: string, value: string, caption: string, detail: string, source: string, bar: number) => ({ rank, label, value, caption, detail, source, bar });
+const reason = (label: string, text: string, source: string) => ({ label, text, source });
 
 function answerForPrompt(question: string): PolicyAnswer {
   const query = question.toLowerCase();
 
-  if (query.includes('cool roof') || query.includes('cool-roof')) {
-    return {
-      heading: 'The strongest evidence supports targeted cool-roof programmes, not universal roll-out.',
-      body: 'The programme brief shows the clearest near-term case in dense, low-income neighbourhoods with high night-time heat retention. Start with public buildings and informal-settlement clusters, require pre-installation roof surveys, and measure indoor temperature reduction before expansion.',
-      citations: ['1', '3'], confidence: 'High confidence · 2 directly supporting sources', supported: true,
-      metrics: [
-        { rank: '01', label: 'Ahmedabad', value: '2.1°C', caption: 'Potential reduction', detail: 'Modelled indoor peak', source: '3', bar: 88 },
-        { rank: '02', label: 'Nagpur', value: '38%', caption: 'Coverage gap', detail: 'Priority households', source: '2', bar: 78 },
-        { rank: '03', label: 'Bhubaneswar', value: '14', caption: 'Pilot-ready wards', detail: 'Can start this year', source: '3', bar: 70 },
-      ],
-      reasons: [
-        { label: 'Impact', text: 'Benefits are largest where roof exposure and night-time heat overlap.', source: '1' },
-        { label: 'Equity', text: 'Targeting low-income clusters avoids subsidising households already able to adapt.', source: '2' },
-        { label: 'Delivery', text: 'Existing municipal pilots reduce procurement and mobilisation time.', source: '3' },
-      ],
-      recommendation: 'Fund a twelve-month targeted phase, publish indoor-temperature results, then expand only where measured benefits clear the programme threshold.',
-    };
-  }
+  if (/budget|fiscal|afford|revenue|expenditure|finance/.test(query)) return {
+    heading: 'Start with Census for the comparable baseline, then reconcile it to the current state budget.',
+    body: 'Use Census government-finance data to compare revenue, expenditure and debt on a consistent basis. Add NASBO for current budget conditions, Urban Institute for easier historical queries, and Pew Fiscal 50 for fiscal-health context. The final funding judgment must be checked against the state budget office or comptroller documents for the relevant fiscal year.',
+    citations: ['4', '1', '2', '3', '15'], status: 'Authoritative-first route · 5 source portals', supported: true,
+    metrics: [metric('01', 'Comparable baseline', 'Census', 'Official finance data', 'Revenue, spending and debt', '4', 92), metric('02', 'Current cycle', 'NASBO', 'Budget context', 'Proposed and enacted state budgets', '1', 78), metric('03', 'Final verification', 'State', 'Official documents', 'Budget office or comptroller detail', '15', 66)],
+    reasons: [reason('Comparability', 'Census supplies a standardized government-finance baseline across jurisdictions.', '4'), reason('Timeliness', 'NASBO adds current fiscal surveys and links to proposed or enacted budgets.', '1'), reason('Interpretation', 'Urban and Pew help analyze trends, but should be reconciled to official records.', '2')],
+    recommendation: 'Specify the state, fiscal year, policy cost and funding mechanism. Then test recurring cost, one-time balances, revenue volatility and legal constraints against the official budget documents.',
+  };
 
-  if (query.includes('coast') || query.includes('flood') || query.includes('cyclone')) {
-    return {
-      heading: 'Prioritise Odisha’s delta districts for near-term coastal adaptation support.',
-      body: 'The available demo evidence points to the largest combined gap in exposure, vulnerable population and delivery capacity around Kendrapara and Jagatsinghpur. Sequence funding from early-warning coverage and resilient public facilities to longer-horizon drainage and shoreline measures.',
-      citations: ['4', '6'], confidence: 'Moderate confidence · evidence years differ', supported: true,
-      metrics: [
-        { rank: '01', label: 'Kendrapara', value: '8.9', caption: 'Priority score', detail: 'High compound risk', source: '4', bar: 89 },
-        { rank: '02', label: 'Jagatsinghpur', value: '8.4', caption: 'Priority score', detail: 'Critical assets exposed', source: '4', bar: 84 },
-        { rank: '03', label: 'Puri', value: '7.6', caption: 'Priority score', detail: 'Seasonal population risk', source: '6', bar: 76 },
-      ],
-      reasons: [
-        { label: 'Exposure', text: 'Low-lying settlements face overlapping cyclone, surge and drainage risks.', source: '4' },
-        { label: 'Services', text: 'Disruption to health, water and evacuation networks magnifies household risk.', source: '4' },
-        { label: 'Readiness', text: 'Planning capacity exists, but last-mile coverage remains uneven.', source: '6' },
-      ],
-      recommendation: 'Start with early-warning coverage and resilient public facilities; gate larger infrastructure funding on district-level maintenance plans.',
-    };
-  }
+  if (/medicaid|health|insurance|hospital/.test(query)) return {
+    heading: 'Use KFF for the policy and data baseline, then verify every legal change in the official state record.',
+    body: 'KFF organizes state health indicators and policy research. NCSL and LegiScan can identify relevant bills and their reported status, while the state legislature website remains the controlling place to confirm bill text, amendments and enactment. Use state budget documents when the question includes appropriations or implementation cost.',
+    citations: ['7', '5', '12', '9', '15'], status: 'Topic-specific route · official text required', supported: true,
+    metrics: [metric('01', 'Policy baseline', 'KFF', 'Health data', 'State indicators and policy research', '7', 90), metric('02', 'Bill discovery', 'NCSL', 'Topic tracking', 'Introduced and enacted legislation', '5', 76), metric('03', 'Legal check', 'Official', 'State record', 'Bill text, history and enacted law', '9', 64)],
+    reasons: [reason('Substance', 'KFF provides health-policy framing and state-level indicators.', '7'), reason('Coverage', 'NCSL and LegiScan help locate relevant legislation across states.', '5'), reason('Authority', 'The official legislature portal should resolve conflicts in text or status.', '9')],
+    recommendation: 'Name the policy, states and date cutoff. Report proposal, enactment and implementation as separate statuses, with a direct official citation for each state-level conclusion.',
+  };
 
-  if (query.includes('fy27') || query.includes('budget') || query.includes('funding programme') || query.includes('allocate')) {
-    return {
-      heading: 'Use a two-stage FY27 allocation tied to both need and delivery milestones.',
-      body: 'Reserve 60% of funding for risk-weighted population and 40% for implementation readiness. Release an initial planning tranche first, then unlock capital funding when districts verify target populations, responsible agencies and measurable twelve-month outcomes.',
-      citations: ['5', '6'], confidence: 'High confidence · finance and readiness sources agree', supported: true,
-      metrics: [
-        { rank: '01', label: 'Risk allocation', value: '60%', caption: 'Needs-based share', detail: 'Population-weighted', source: '5', bar: 84 },
-        { rank: '02', label: 'Readiness gate', value: '40%', caption: 'Delivery share', detail: 'Milestone-linked', source: '6', bar: 72 },
-        { rank: '03', label: 'First review', value: '6 mo', caption: 'Release checkpoint', detail: 'Verify outcomes', source: '5', bar: 62 },
-      ],
-      reasons: [
-        { label: 'Fairness', text: 'A risk-weighted base directs money toward people facing the greatest exposure.', source: '5' },
-        { label: 'Delivery', text: 'A readiness component prevents allocations from stalling in low-capacity pipelines.', source: '6' },
-        { label: 'Learning', text: 'Staged release creates an early point to correct targets and programme design.', source: '5' },
-      ],
-      recommendation: 'Issue a planning tranche immediately, then release capital funding only when districts verify beneficiaries, accountable agencies and twelve-month outcomes.',
-    };
-  }
+  if (/education|school|teacher|student/.test(query)) return {
+    heading: 'Lead with ECS for education-specific tracking and use the official legislature record for confirmation.',
+    body: 'Education Commission of the States provides topic-based state legislation tracking. NCSL broadens the cross-policy scan, and LegiScan can help monitor bill movement. Treat all three as discovery and analysis layers; confirm current bill text, status and enacted statutes on each state’s official legislature website.',
+    citations: ['8', '5', '12', '9'], status: 'Education route · official text required', supported: true,
+    metrics: [metric('01', 'Topic scan', 'ECS', 'Education policy', 'State legislation organized by topic', '8', 91), metric('02', 'Cross-check', 'NCSL', '50-state context', 'Broader legislative databases', '5', 74), metric('03', 'Final authority', 'State', 'Official portal', 'Current text and legal status', '9', 62)],
+    reasons: [reason('Relevance', 'ECS is the subject-matter tracker in this source set.', '8'), reason('Breadth', 'NCSL helps identify related activity beyond education-only categories.', '5'), reason('Verification', 'Official state records control for bill language and status.', '9')],
+    recommendation: 'Define the education topic and legislative session before comparing states; capture bill number, last action date, status and the official bill URL.',
+  };
 
-  if (query.includes('readiness') || query.includes('compare') || query.includes('state')) {
-    return {
-      heading: 'Gujarat leads on implementation readiness; Odisha shows the largest near-term opportunity.',
-      body: 'Gujarat benefits from established heat-action governance and scalable pilots. Odisha has strong planning foundations but wider last-mile coverage gaps. Maharashtra sits between them: programme capacity is credible, though neighbourhood-level targeting needs improvement.',
-      citations: ['2', '6'], confidence: 'Moderate confidence · 2 comparable sources', supported: true,
-      metrics: [
-        { rank: '01', label: 'Gujarat', value: '8.6', caption: 'Readiness score', detail: 'Scale now', source: '6', bar: 86 },
-        { rank: '02', label: 'Odisha', value: '7.8', caption: 'Readiness score', detail: 'Close coverage gaps', source: '6', bar: 78 },
-        { rank: '03', label: 'Maharashtra', value: '7.2', caption: 'Readiness score', detail: 'Improve targeting', source: '2', bar: 72 },
-      ],
-      reasons: [
-        { label: 'Governance', text: 'Gujarat has the clearest continuity of ownership and operating routines.', source: '2' },
-        { label: 'Opportunity', text: 'Odisha can translate mature plans into wider last-mile programme coverage.', source: '6' },
-        { label: 'Targeting', text: 'Maharashtra needs stronger neighbourhood-level beneficiary definition.', source: '6' },
-      ],
-      recommendation: 'Use differentiated support: scale capital in Gujarat, pair funding with delivery assistance in Odisha, and fund targeting improvements in Maharashtra.',
-    };
-  }
+  if (/ordinance|municipal|county|city code|local law/.test(query)) return {
+    heading: 'Search Municode and American Legal, then confirm the result with the issuing jurisdiction.',
+    body: 'Municode and American Legal organize many city and county codes and are strong discovery tools. Because publication dates and supplements vary, check the code’s currency statement and confirm the relevant section, amendment and effective date on the city or county’s official website. Do not treat an aggregator copy as conclusive when the jurisdiction publishes a newer record.',
+    citations: ['13', '14'], status: 'Local-law route · jurisdiction verification required', supported: true,
+    metrics: [metric('01', 'Primary search', 'Municode', 'Local code library', 'Browse by state and jurisdiction', '13', 88), metric('02', 'Second search', 'AmLegal', 'Local code library', 'Alternative municipal coverage', '14', 74), metric('03', 'Final authority', 'Local', 'Official record', 'Confirm amendments and effective date', '13', 60)],
+    reasons: [reason('Discovery', 'Both libraries let you locate municipal codes by state and jurisdiction.', '13'), reason('Currency', 'The publication or supplement date determines how current the text may be.', '14'), reason('Authority', 'The issuing city or county should confirm the operative ordinance.', '13')],
+    recommendation: 'Record the jurisdiction, code section, ordinance number, adoption date, effective date and source URL. If currency is unclear, contact the clerk or code publisher before relying on the text.',
+  };
 
-  if (query.includes('heat') || query.includes('district') || query.includes('priority') || query.includes('ahmedabad') || query.includes('nagpur')) {
-    return {
-      heading: 'Prioritise Ahmedabad, Nagpur and Bhubaneswar in the first funding tranche.',
-      body: 'These districts combine very high heat exposure with large populations in informal settlements and relatively low local adaptation capacity. Ahmedabad has the highest absolute population at risk, while Nagpur and Bhubaneswar show the sharpest gap between projected exposure and current programme coverage.',
-      citations: ['1', '2', '3'], confidence: 'High confidence · 3 source types agree', supported: true,
-      metrics: [
-        { rank: '01', label: 'Ahmedabad', value: '8.7', caption: 'Priority score', detail: '1.9M people at high risk', source: '1', bar: 87 },
-        { rank: '02', label: 'Nagpur', value: '8.2', caption: 'Priority score', detail: '38% lacks coverage', source: '2', bar: 82 },
-        { rank: '03', label: 'Bhubaneswar', value: '7.9', caption: 'Priority score', detail: '+1.8°C projected', source: '1', bar: 79 },
-      ],
-      reasons: [
-        { label: 'Exposure', text: 'All three are in the top decile for extreme-heat days and night-time heat retention.', source: '1' },
-        { label: 'Equity', text: 'More than one-third of the exposed population lives in low-income or informal settlements.', source: '2' },
-        { label: 'Feasibility', text: 'Existing cool-roof and early-warning pilots can absorb additional funding within twelve months.', source: '3' },
-      ],
-      recommendation: 'Allocate 60% of the first tranche by risk-weighted population and 40% against implementation-ready milestones.',
-    };
-  }
+  if (/ballot|election|measure/.test(query)) return {
+    heading: 'Use Ballotpedia for orientation, then verify the measure through the state election or legislative authority.',
+    body: 'Ballotpedia is useful for summaries and cross-state discovery. NCSL can add topic-specific policy context. Final wording, qualification status, fiscal notes and results should come from the responsible state election office, legislature or other official record.',
+    citations: ['6', '5'], status: 'Discovery route · official election record required', supported: true,
+    metrics: [metric('01', 'Overview', 'Ballotpedia', 'Measure summaries', 'Cross-state discovery and context', '6', 86), metric('02', 'Policy context', 'NCSL', 'Topic research', 'Related state policy activity', '5', 70), metric('03', 'Final authority', 'State', 'Election record', 'Official text, status and results', '6', 58)],
+    reasons: [reason('Orientation', 'Ballotpedia provides accessible summaries and cross-state navigation.', '6'), reason('Context', 'NCSL can connect a measure to wider state policy trends.', '5'), reason('Verification', 'Official state records should support the final wording and status.', '6')],
+    recommendation: 'Use the official measure text and fiscal analysis for any decision memo, and note the retrieval date because qualification and litigation status can change.',
+  };
+
+  if (/law|statute|bill|legislation|policy/.test(query)) return {
+    heading: 'Track broadly with NCSL and LegiScan, but cite the official legislature for every legal conclusion.',
+    body: 'NCSL offers curated topic databases, while LegiScan supports cross-state bill discovery and monitoring. Justia and FindLaw are useful secondary code lookups. The official state legislature website should be used to confirm bill text, amendments, history and codified law before a result is reported as current.',
+    citations: ['5', '12', '9', '10', '11'], status: 'Legislative route · official text required', supported: true,
+    metrics: [metric('01', 'Topic tracking', 'NCSL', 'Curated databases', 'Policy-specific state legislation', '5', 90), metric('02', 'Monitoring', 'LegiScan', 'Cross-state bills', 'Search and status discovery', '12', 75), metric('03', 'Final authority', 'Official', 'State legislature', 'Text, history and codified law', '9', 63)],
+    reasons: [reason('Coverage', 'NCSL and LegiScan reduce the chance of missing relevant bills across states.', '5'), reason('Lookup', 'Justia and FindLaw are convenient secondary indexes for state codes.', '10'), reason('Authority', 'Official legislature records control when sources disagree.', '9')],
+    recommendation: 'Set the topic, states, sessions and cutoff date. For each result, preserve the official bill URL, last action, enacted chapter or code section, and retrieval date.',
+  };
 
   return {
-    heading: 'The current demo evidence cannot answer this reliably.',
-    body: 'This prototype is grounded only in the three displayed demo sources, covering heat exposure, a state heat-action plan and an urban cooling programme. Add a relevant source or reframe the question around heat risk, adaptation readiness, cool roofs, coastal priorities or programme funding.',
-    citations: [], confidence: 'Evidence limit · no supported claim', supported: false,
-    metrics: [], reasons: [], recommendation: '',
+    heading: 'This question needs a jurisdiction, policy topic and date before a defensible answer can be produced.',
+    body: 'The source library can route fiscal, legislative, health, education and local-law research, but it should not invent a substantive conclusion from an underspecified prompt. Add the state or locality, the decision being made, and the date or legislative session.',
+    citations: ['5', '4'], status: 'Scope needed · no policy conclusion generated', supported: false, metrics: [],
+    reasons: [reason('Jurisdiction', 'State and local policy sources differ by issuing authority.', '5'), reason('Time', 'Budgets, bill status and code supplements change over time.', '4'), reason('Decision', 'The evidence depends on whether the task is comparison, tracking or legal verification.', '5')],
+    recommendation: 'Try: “Compare enacted paid-leave laws in California and New York as of August 2026,” or “Can Colorado fund a recurring $100 million programme in FY2027?”',
   };
 }
 
+function Citation({ id }: { id: string }) {
+  const source = sources.find((item) => item.id === id);
+  if (!source) return null;
+  return <a className="citation-link" href={source.url} aria-label={`Open source ${id}: ${source.title}`}>[{id}]</a>;
+}
+
+function Answer({ answer, thinking }: { answer: PolicyAnswer; thinking: boolean }) {
+  if (thinking) return <article className="answer-card thinking"><div className="answer-head"><div className="adapt-avatar">A</div><div><p className="message-meta">AdapT is routing the question</p><span className="thinking-dots"><i /><i /><i /></span></div></div></article>;
+  return <article className="answer-card">
+    <div className="answer-head"><div className="adapt-avatar">A</div><div><p className="message-meta">AdapT insight <span>Just now</span></p><small>Source routing with authoritative verification</small></div></div>
+    <div className="confidence-row"><span className="confidence"><i /> {answer.supported ? 'Research route ready' : 'More scope needed'}</span><span>{answer.status}</span></div>
+    <h2>{answer.heading}</h2><p>{answer.body} {answer.citations.map((id) => <Citation id={id} key={id} />)}</p>
+    {answer.metrics.length > 0 && <div className="priority-grid">{answer.metrics.map((item) => <div className="priority-card" key={item.label}><div><span className="rank">{item.rank}</span><strong>{item.label}</strong></div><b>{item.value}</b><small>{item.caption}</small><div className="meter"><span style={{ width: `${item.bar}%` }} /></div><p>{item.detail} <Citation id={item.source} /></p></div>)}</div>}
+    {answer.reasons.length > 0 && <h3>Why this source order</h3>}
+    {answer.reasons.length > 0 && <ul className="reason-list">{answer.reasons.map((item) => <li key={item.label}><span>{item.label}</span><p>{item.text} <Citation id={item.source} /></p></li>)}</ul>}
+    {answer.recommendation && <div className="recommendation"><span className="recommendation-icon">↗</span><div><strong>Recommended next step</strong><p>{answer.recommendation}</p></div></div>}
+    <div className="answer-actions"><button type="button">▣&nbsp; Add to brief</button><button type="button">⇩&nbsp; Export source plan</button><span /><button className="reaction" type="button" aria-label="Helpful">♡</button><button className="reaction" type="button" aria-label="Copy answer">▢</button></div>
+  </article>;
+}
+
 export default function Home() {
+  const initial = recentChats[0];
   const [prompt, setPrompt] = useState('');
-  const [followUp, setFollowUp] = useState('');
+  const [currentQuestion, setCurrentQuestion] = useState(initial.question);
+  const [currentAnswer, setCurrentAnswer] = useState<PolicyAnswer>(() => answerForPrompt(initial.question));
   const [isThinking, setIsThinking] = useState(false);
   const [traceOpen, setTraceOpen] = useState(false);
   const [evidenceOpen, setEvidenceOpen] = useState(true);
   const [isNewChat, setIsNewChat] = useState(false);
-  const [activeTitle, setActiveTitle] = useState('Heat resilience priorities');
-  const [activeRecent, setActiveRecent] = useState<string | null>('heat');
-  const [currentAnswer, setCurrentAnswer] = useState<PolicyAnswer>(() => answerForPrompt('heat priorities'));
-  const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null);
+  const [activeTitle, setActiveTitle] = useState(initial.title);
+  const [activeRecent, setActiveRecent] = useState<string | null>(initial.id);
 
   function askQuestion(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const nextPrompt = prompt.trim();
-    if (!nextPrompt) return;
-    setFollowUp(nextPrompt);
-    setCurrentAnswer(answerForPrompt(nextPrompt));
-    setActiveTitle(nextPrompt.length > 42 ? `${nextPrompt.slice(0, 42)}…` : nextPrompt);
-    setActiveRecent(null);
-    setPrompt('');
-    setIsThinking(true);
-    window.setTimeout(() => setIsThinking(false), 850);
+    event.preventDefault(); const question = prompt.trim(); if (!question) return;
+    setCurrentQuestion(question); setCurrentAnswer(answerForPrompt(question)); setActiveTitle(question.length > 42 ? `${question.slice(0, 42)}…` : question); setActiveRecent(null); setIsNewChat(false); setPrompt(''); setIsThinking(true); window.setTimeout(() => setIsThinking(false), 650);
   }
-
-  function applySuggestion(suggestion: string) {
-    setPrompt(suggestion);
-    window.setTimeout(() => document.querySelector<HTMLTextAreaElement>('.composer textarea')?.focus(), 0);
-  }
-
   function startNewChat() {
-    setIsNewChat(true);
-    setFollowUp('');
-    setPrompt('');
-    setIsThinking(false);
-    setTraceOpen(false);
-    setActiveTitle('New policy question');
-    setActiveRecent(null);
-    window.setTimeout(() => document.querySelector<HTMLTextAreaElement>('.composer textarea')?.focus(), 0);
+    setIsNewChat(true); setCurrentQuestion(''); setPrompt(''); setIsThinking(false); setTraceOpen(false); setActiveTitle('New policy question'); setActiveRecent(null); window.setTimeout(() => document.querySelector<HTMLTextAreaElement>('.composer textarea')?.focus(), 0);
   }
-
   function openRecentChat(chat: (typeof recentChats)[number]) {
-    setActiveRecent(chat.id);
-    setActiveTitle(chat.title);
-    setPrompt('');
-    setIsThinking(false);
-    setTraceOpen(false);
-    if (chat.id === 'heat') {
-      setIsNewChat(false);
-      setFollowUp('');
-    } else {
-      setIsNewChat(true);
-      setFollowUp(chat.question);
-      setCurrentAnswer(answerForPrompt(chat.question));
-    }
-    document.getElementById('conversation')?.scrollIntoView({ behavior: 'smooth' });
+    setActiveRecent(chat.id); setActiveTitle(chat.title); setCurrentQuestion(chat.question); setCurrentAnswer(answerForPrompt(chat.question)); setPrompt(''); setIsThinking(false); setIsNewChat(false); setTraceOpen(false); document.getElementById('conversation')?.scrollIntoView({ behavior: 'smooth' });
   }
+  const displayedSources = isNewChat ? sources : sources.filter((source) => currentAnswer.citations.includes(source.id));
+  const sourceCount = displayedSources.length;
 
-  const hasSupportedAnswer = !followUp || currentAnswer.supported;
-  const citedSourceCount = followUp ? currentAnswer.citations.length : 3;
-  const coveragePercent = hasSupportedAnswer ? (citedSourceCount === 3 ? 92 : 84) : 0;
-  const displayedSources = followUp && currentAnswer.supported
-    ? sources.filter((source) => currentAnswer.citations.includes(source.id))
-    : followUp ? sources : sources.slice(0, 3);
-  const selectedSource = sources.find((source) => source.id === selectedSourceId);
-
-  return (
-    <main className="app-shell">
-      <aside className="sidebar">
-        <div className="brand">
-          <div className="brand-mark" aria-hidden="true"><span /><span /><span /></div>
-          <div><strong>AdapT</strong><small>Policy intelligence</small></div>
+  return <main className="app-shell">
+    <aside className="sidebar">
+      <div className="brand"><div className="brand-mark" aria-hidden="true"><span /><span /><span /></div><div><strong>AdapT</strong><small>Policy intelligence</small></div></div>
+      <button className="new-brief" type="button" onClick={startNewChat}><span>＋</span> New conversation</button>
+      <nav aria-label="Primary navigation"><p className="nav-label">Workspace</p><a className="nav-item active" href="#conversation"><span className="nav-icon">⌁</span> Ask AdapT</a><a className="nav-item" href="#sources"><span className="nav-icon">▤</span> Evidence library <span className="count">15</span></a><a className="nav-item" href="#briefs"><span className="nav-icon">□</span> Saved briefs</a><p className="nav-label recent-label">Recent</p>{recentChats.map((chat) => <button className={`recent-item ${activeRecent === chat.id ? 'selected' : ''}`} type="button" key={chat.id} onClick={() => openRecentChat(chat)}>{chat.title}<small>{chat.time}</small></button>)}</nav>
+      <div className="sidebar-footer"><div className="profile-avatar">AR</div><div><strong>Alex Rivera</strong><small>Policy Unit</small></div><button type="button" aria-label="Profile options">•••</button></div>
+    </aside>
+    <section className="workspace" id="conversation">
+      <header className="topbar"><div><p>U.S. state & local policy workspace</p><h1>{activeTitle}</h1></div><div className="topbar-actions"><span className="demo-badge">Verified source links</span><span className="live-badge"><i /> Catalog checked Aug 2026</span><button className="icon-button" type="button" aria-label="More actions">•••</button><button className="share-button" type="button">↗&nbsp; Share brief</button></div></header>
+      <div className={`conversation-wrap ${evidenceOpen ? '' : 'evidence-collapsed'}`}>
+        <div className="conversation">
+          {!isNewChat && <><div className="user-message"><div className="message-avatar">AR</div><div><p className="message-meta">You <span>Just now</span></p><p>{currentQuestion}</p></div></div><Answer answer={currentAnswer} thinking={isThinking} /></>}
+          {isNewChat && <section className="empty-chat"><div className="empty-chat-mark">A</div><p>New conversation</p><h2>What state or local policy decision are you working through?</h2><span>Include the jurisdiction, policy topic and date. AdapT will route the question to the appropriate fiscal, legislative, health, education or legal sources.</span></section>}
+          <div className="composer-block"><p className="suggestion-label">Continue exploring</p><div className="suggestions">{suggestions.map((suggestion) => <button type="button" key={suggestion} onClick={() => { setPrompt(suggestion); window.setTimeout(() => document.querySelector<HTMLTextAreaElement>('.composer textarea')?.focus(), 0); }}>{suggestion} <span>→</span></button>)}</div><form className="composer" onSubmit={askQuestion}><textarea aria-label="Ask a policy question" placeholder="Ask about a U.S. state or local policy…" rows={1} value={prompt} onChange={(event) => setPrompt(event.target.value)} /><div className="composer-footer"><button type="button" className="attach-button" aria-label="Attach a document">＋</button><span>15 linked source portals</span><button type="submit" className="send-button" aria-label="Send question">↑</button></div></form><p className="disclaimer">AdapT routes research; verify consequential fiscal and legal conclusions in the cited official record.</p></div>
         </div>
-        <button className="new-brief" type="button" onClick={startNewChat}><span>＋</span> New conversation</button>
-        <nav aria-label="Primary navigation">
-          <p className="nav-label">Workspace</p>
-          <a className="nav-item active" href="#conversation"><span className="nav-icon">⌁</span> Ask AdapT</a>
-          <a className="nav-item" href="#sources"><span className="nav-icon">▤</span> Evidence library <span className="count">18</span></a>
-          <a className="nav-item" href="#briefs"><span className="nav-icon">□</span> Saved briefs</a>
-          <p className="nav-label recent-label">Recent</p>
-          {recentChats.map((chat) => (
-            <button className={`recent-item ${activeRecent === chat.id ? 'selected' : ''}`} type="button" key={chat.id} onClick={() => openRecentChat(chat)}>
-              {chat.title}<small>{chat.time}</small>
-            </button>
-          ))}
-        </nav>
-        <div className="sidebar-footer">
-          <div className="profile-avatar">AR</div>
-          <div><strong>Ananya Rao</strong><small>Policy Unit</small></div>
-          <button type="button" aria-label="Profile options">•••</button>
-        </div>
-      </aside>
-
-      <section className="workspace" id="conversation">
-        <header className="topbar">
-          <div><p>Policy workspace</p><h1>{activeTitle}</h1></div>
-          <div className="topbar-actions">
-            <span className="demo-badge">Demo evidence</span>
-            <span className="live-badge"><i /> Data updated Jun 2025</span>
-            <button className="icon-button" type="button" aria-label="More actions">•••</button>
-            <button className="share-button" type="button">↗&nbsp; Share brief</button>
-          </div>
-        </header>
-
-        <div className={`conversation-wrap ${evidenceOpen ? '' : 'evidence-collapsed'}`}>
-          <div className="conversation">
-            {!isNewChat && <>
-              <div className="user-message">
-                <div className="message-avatar">AR</div>
-                <div><p className="message-meta">You <span>10:42 AM</span></p><p>Which districts should we prioritise for heat adaptation funding, and why?</p></div>
-              </div>
-
-              <article className="answer-card">
-              <div className="answer-head">
-                <div className="adapt-avatar">A</div>
-                <div><p className="message-meta">AdapT insight <span>10:42 AM</span></p><small>Analysed 18 sources across 6 indicators</small></div>
-              </div>
-              <div className="confidence-row"><span className="confidence"><i /> High confidence</span><span>Evidence agrees across 3 source types</span></div>
-              <h2>Prioritise Ahmedabad, Nagpur and Bhubaneswar in the first funding tranche.</h2>
-              <p>These districts combine <strong>very high heat exposure</strong> with large populations in informal settlements and relatively low local adaptation capacity. Ahmedabad has the highest absolute population at risk, while Nagpur and Bhubaneswar show the sharpest gap between projected exposure and current programme coverage.</p>
-
-              <div className="priority-grid">
-                <div className="priority-card">
-                  <div><span className="rank">01</span><strong>Ahmedabad</strong></div><b>8.7</b><small>Priority score</small>
-                  <div className="meter"><span style={{ width: '87%' }} /></div><p><em>1.9M</em> people at high risk <button className="citation-link" type="button" onClick={() => setSelectedSourceId('1')}>[1]</button></p>
-                </div>
-                <div className="priority-card">
-                  <div><span className="rank">02</span><strong>Nagpur</strong></div><b>8.2</b><small>Priority score</small>
-                  <div className="meter"><span style={{ width: '82%' }} /></div><p><em>38%</em> population lacks coverage <button className="citation-link" type="button" onClick={() => setSelectedSourceId('2')}>[2]</button></p>
-                </div>
-                <div className="priority-card">
-                  <div><span className="rank">03</span><strong>Bhubaneswar</strong></div><b>7.9</b><small>Priority score</small>
-                  <div className="meter"><span style={{ width: '79%' }} /></div><p><em>+1.8°C</em> projected by 2040 <button className="citation-link" type="button" onClick={() => setSelectedSourceId('1')}>[1]</button></p>
-                </div>
-              </div>
-
-              <h3>Why these three</h3>
-              <ul className="reason-list">
-                <li><span>Exposure</span><p>All three are in the top decile for extreme-heat days and night-time heat retention. <button className="citation-link" type="button" onClick={() => setSelectedSourceId('1')}>[1]</button></p></li>
-                <li><span>Equity</span><p>More than one-third of the exposed population lives in low-income or informal settlements. <button className="citation-link" type="button" onClick={() => setSelectedSourceId('2')}>[2]</button></p></li>
-                <li><span>Feasibility</span><p>Existing cool-roof and early-warning pilots can absorb additional funding within 12 months. <button className="citation-link" type="button" onClick={() => setSelectedSourceId('3')}>[3]</button></p></li>
-              </ul>
-
-              <div className="recommendation"><span className="recommendation-icon">↗</span><div><strong>Recommended next step</strong><p>Allocate 60% of the first tranche by risk-weighted population and 40% against implementation-ready milestones.</p></div></div>
-              <div className="answer-actions">
-                <button type="button">▣&nbsp; Add to brief</button><button type="button">⇩&nbsp; Export table</button><span />
-                <button className="reaction" type="button" aria-label="Helpful">♡</button><button className="reaction" type="button" aria-label="Copy answer">▢</button>
-              </div>
-              </article>
-            </>}
-
-            {isNewChat && !followUp && (
-              <section className="empty-chat">
-                <div className="empty-chat-mark">A</div>
-                <p>New conversation</p>
-                <h2>What policy decision are you working through?</h2>
-                <span>Ask about priorities, compare places, or test a programme option against the available evidence.</span>
-              </section>
-            )}
-
-            {followUp && (
-              <div className="follow-up-thread" aria-live="polite">
-                <div className="follow-up-question"><div className="message-avatar">AR</div><div><p className="message-meta">You <span>Just now</span></p><p>{followUp}</p></div></div>
-                <div className={`follow-up-answer ${isThinking ? 'thinking' : ''}`}>
-                  <div className="adapt-avatar">A</div>
-                  {isThinking ? (
-                    <div><p className="message-meta">AdapT is checking the evidence</p><span className="thinking-dots"><i /><i /><i /></span></div>
-                  ) : (
-                    <div>
-                      <p className="message-meta">AdapT insight <span>Just now</span></p>
-                      <h3>{currentAnswer.heading}</h3>
-                      <p>{currentAnswer.body} {currentAnswer.citations.map((citation) => <button className="citation-link" type="button" onClick={() => setSelectedSourceId(citation)} key={citation}>[{citation}]</button>)}</p>
-                      {currentAnswer.metrics.length > 0 && (
-                        <div className="priority-grid dynamic-priority-grid">
-                          {currentAnswer.metrics.map((metric) => (
-                            <div className="priority-card" key={metric.label}>
-                              <div><span className="rank">{metric.rank}</span><strong>{metric.label}</strong></div><b>{metric.value}</b><small>{metric.caption}</small>
-                              <div className="meter"><span style={{ width: `${metric.bar}%` }} /></div><p>{metric.detail} <button className="citation-link" type="button" onClick={() => setSelectedSourceId(metric.source)}>[{metric.source}]</button></p>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      {currentAnswer.reasons.length > 0 && <h4>Why this recommendation</h4>}
-                      {currentAnswer.reasons.length > 0 && (
-                        <ul className="reason-list dynamic-reasons">
-                          {currentAnswer.reasons.map((reason) => <li key={reason.label}><span>{reason.label}</span><p>{reason.text} <button className="citation-link" type="button" onClick={() => setSelectedSourceId(reason.source)}>[{reason.source}]</button></p></li>)}
-                        </ul>
-                      )}
-                      {currentAnswer.recommendation && <div className="recommendation"><span className="recommendation-icon">↗</span><div><strong>Recommended next step</strong><p>{currentAnswer.recommendation}</p></div></div>}
-                      <small className={currentAnswer.supported ? '' : 'evidence-limit'}><i /> {currentAnswer.confidence}</small>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            <div className="composer-block">
-              <p className="suggestion-label">Continue exploring</p>
-              <div className="suggestions">{suggestions.map((suggestion) => <button type="button" key={suggestion} onClick={() => applySuggestion(suggestion)}>{suggestion} <span>→</span></button>)}</div>
-              <form className="composer" onSubmit={askQuestion}>
-                <textarea aria-label="Ask a policy question" placeholder="Ask a follow-up about the evidence…" rows={1} value={prompt} onChange={(event) => setPrompt(event.target.value)} />
-                <div className="composer-footer"><button type="button" className="attach-button" aria-label="Attach a document">＋</button><span>AdapT data + 18 documents</span><button type="submit" className="send-button" aria-label="Send question">↑</button></div>
-              </form>
-              <p className="disclaimer">AdapT can make mistakes. Verify critical decisions against the cited sources.</p>
-            </div>
-          </div>
-
-          <aside className={`evidence-panel ${evidenceOpen ? '' : 'collapsed'}`} id="sources">
-            <div className="evidence-header"><div><p>Evidence</p><span>{citedSourceCount} cited {citedSourceCount === 1 ? 'source' : 'sources'}</span></div><button type="button" aria-label={evidenceOpen ? 'Close evidence panel' : 'Open evidence panel'} onClick={() => setEvidenceOpen(!evidenceOpen)}>{evidenceOpen ? '×' : '‹'}</button></div>
-            <div className="evidence-body">
-              <div className={`coverage-card ${hasSupportedAnswer ? '' : 'coverage-gap'}`}><div className="coverage-ring" style={{ background: `conic-gradient(${hasSupportedAnswer ? '#337657' : '#c4933b'} 0 ${coveragePercent}%, #dbe9e0 ${coveragePercent}% 100%)` }}><span>{coveragePercent}<small>%</small></span></div><div><strong>{hasSupportedAnswer ? 'Strong coverage' : 'Evidence gap'}</strong><p>{hasSupportedAnswer ? 'Key claims are directly supported.' : 'No current source supports this question.'}</p></div></div>
-              <p className="panel-label">{hasSupportedAnswer ? 'Cited in this answer' : 'Available demo sources'}</p>
-              <div className="source-list">
-                {displayedSources.map((source) => (
-                  <article className="source-card" id={`source-${source.id}`} key={source.id}>
-                    <div className={`source-number ${source.color}`}>{source.id}</div>
-                    <div className="source-copy"><span>{source.type}</span><strong>{source.title}</strong><small>{source.detail}</small></div>
-                    <button type="button" aria-label={`Open ${source.title}`} onClick={() => setSelectedSourceId(source.id)}>↗</button>
-                  </article>
-                ))}
-              </div>
-              <div className="method-card"><div className="method-icon">◎</div><div><strong>How this answer was built</strong><p>See how indicators were weighted and claims matched to evidence.</p><button type="button" onClick={() => setTraceOpen(!traceOpen)}>{traceOpen ? 'Hide reasoning trace ↑' : 'View reasoning trace →'}</button></div></div>
-              {traceOpen && <div className="reasoning-trace"><p><span>1</span> Retrieved district-level heat, vulnerability and readiness indicators.</p><p><span>2</span> Normalised six measures to a common 0–10 scale.</p><p><span>3</span> Matched each recommendation to a document passage or programme record.</p><p><span>4</span> Flagged limits where reporting periods differ.</p></div>}
-              <div className="evidence-note"><strong>Evidence boundary</strong><p>Scores are comparative, not forecasts. District values use the latest available reporting period and may differ in source years.</p></div>
-            </div>
-          </aside>
-        </div>
-      </section>
-      {selectedSource && (
-        <div className="source-dialog-backdrop" role="presentation" onClick={() => setSelectedSourceId(null)}>
-          <section className="source-dialog" role="dialog" aria-modal="true" aria-labelledby="source-dialog-title" onClick={(event) => event.stopPropagation()}>
-            <div className="source-dialog-head">
-              <div className={`source-number ${selectedSource.color}`}>{selectedSource.id}</div>
-              <div><span>{selectedSource.type}</span><h2 id="source-dialog-title">{selectedSource.title}</h2><p>{selectedSource.detail}</p></div>
-              <button type="button" aria-label="Close source preview" onClick={() => setSelectedSourceId(null)}>×</button>
-            </div>
-            <div className="source-location"><span>Referenced location</span><strong>{selectedSource.location}</strong></div>
-            <blockquote>“{selectedSource.excerpt}”</blockquote>
-            <div className="source-dialog-note"><strong>Demo source preview</strong><p>This prototype does not yet have the original document attached. Replace this preview with a verified document URL or uploaded source before using the evidence in a policy decision.</p></div>
-          </section>
-        </div>
-      )}
-    </main>
-  );
+        <aside className={`evidence-panel ${evidenceOpen ? '' : 'collapsed'}`} id="sources">
+          <div className="evidence-header"><div><p>Evidence</p><span>{isNewChat ? '15 available sources' : `${sourceCount} cited ${sourceCount === 1 ? 'source' : 'sources'}`}</span></div><button type="button" aria-label={evidenceOpen ? 'Close evidence panel' : 'Open evidence panel'} onClick={() => setEvidenceOpen(!evidenceOpen)}>{evidenceOpen ? '×' : '‹'}</button></div>
+          <div className="evidence-body"><div className={`coverage-card ${currentAnswer.supported || isNewChat ? '' : 'coverage-gap'}`}><div className="coverage-ring" style={{ background: `conic-gradient(${currentAnswer.supported || isNewChat ? '#337657' : '#c4933b'} 0 100%, #dbe9e0 100% 100%)` }}><span>{sourceCount || 15}</span></div><div><strong>{isNewChat ? 'Source catalog ready' : currentAnswer.supported ? 'Direct source route' : 'Scope required'}</strong><p>{isNewChat ? 'Ask a question to select the right sources.' : currentAnswer.supported ? 'Every citation opens the original portal.' : 'No substantive conclusion was generated.'}</p></div></div><p className="panel-label">{isNewChat ? 'Available source portals' : 'Cited in this answer'}</p><div className="source-list">{displayedSources.map((source) => <article className="source-card" id={`source-${source.id}`} key={source.id}><div className={`source-number ${source.color}`}>{source.id}</div><div className="source-copy"><span>{source.type}</span><strong>{source.title}</strong><small>{source.detail}</small></div><a href={source.url} aria-label={`Open ${source.title}`}>↗</a></article>)}</div><div className="method-card"><div className="method-icon">◎</div><div><strong>How this answer was built</strong><p>See how the question was classified and routed to authoritative and secondary sources.</p><button type="button" onClick={() => setTraceOpen(!traceOpen)}>{traceOpen ? 'Hide source trace ↑' : 'View source trace →'}</button></div></div>{traceOpen && <div className="reasoning-trace"><p><span>1</span> Classified the question by jurisdiction, topic and decision type.</p><p><span>2</span> Selected primary government data or official legal text where available.</p><p><span>3</span> Added specialist trackers for comparison and discovery.</p><p><span>4</span> Required official state or local verification for final conclusions.</p></div>}<div className="evidence-note"><strong>Evidence boundary</strong><p>Trackers and legal aggregators are discovery aids. Use the responsible government agency, legislature, election office or jurisdiction for final fiscal and legal verification.</p></div></div>
+        </aside>
+      </div>
+    </section>
+  </main>;
 }
