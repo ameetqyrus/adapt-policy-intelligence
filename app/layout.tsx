@@ -6,7 +6,7 @@ const dmSans = DM_Sans({ variable: '--font-dm-sans', subsets: ['latin'] });
 const lora = Lora({ variable: '--font-lora', subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
+  metadataBase: new URL('https://adapt-policy-intelligence.amitonquest.chatgpt.site'),
   title: 'AdapT — Policy Intelligence',
   description: 'Evidence-grounded climate adaptation intelligence for public policy decisions.',
   openGraph: {
