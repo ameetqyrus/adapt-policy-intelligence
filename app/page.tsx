@@ -64,14 +64,26 @@ function buildAnswer(home: County, peer: County, prompt: string) {
   const peerAhead = (peerWage ?? 0) > (homeWage ?? 0) || (peerEmployment ?? 0) > (homeEmployment ?? 0);
   const isAvoid = /avoid|mistake|shouldn't|should not/.test(lower);
   const isInvestment = /education|workforce|spend|investment|budget/.test(lower);
+  const isEmployment = /employment|employ|job|jobs|hiring|retention|labor|labour/.test(lower);
+  const isWage = /wage|pay|income|earning|salary/.test(lower);
   const isPractice = /practice|policy|programme|program|investigate|copy|learn/.test(lower);
+  const employmentGap = (peerEmployment ?? 0) - (homeEmployment ?? 0);
+  const wageGap = (peerWage ?? 0) - (homeWage ?? 0);
   const emphasis = isAvoid
     ? 'Treat programmes as candidates for investigation, not recipes. Different state powers, tax structures and delivery partners can make a policy non-transferable.'
+    : isEmployment
+      ? `The ${Math.abs(employmentGap).toFixed(1)} percentage-point employment difference is a signal to investigate participant pathways, employer demand and retention—not evidence of one proven cause.`
+    : isWage
+      ? `The ${formatMetric('star_median2022', Math.abs(wageGap))} wage difference helps focus the inquiry on occupation mix, industry demand and job quality, while ADAPT alone cannot identify the cause.`
     : isInvestment
       ? 'The data show spending and outcome differences, while the official plans show how each county is organizing workforce delivery. That is a useful research lead, but it is not proof that one programme caused the outcome gap.'
       : 'The comparison points to a focused policy investigation: workforce pathways, target-industry strategy and implementation capacity—not a generic search across every county policy.';
   const title = isAvoid
     ? `Do not copy ${compactName(peer.name)} wholesale; test whether its delivery model transfers.`
+    : isEmployment
+      ? `${compactName(peer.name)}’s employment rate is ${employmentGap >= 0 ? 'higher' : 'lower'} by ${Math.abs(employmentGap).toFixed(1)} percentage points.`
+    : isWage
+      ? `${compactName(peer.name)}’s non-college median wage is ${wageGap >= 0 ? 'higher' : 'lower'} by ${formatMetric('star_median2022', Math.abs(wageGap))}.`
     : isInvestment
       ? 'Education spending differs sharply, but spending alone does not explain the workforce outcome gap.'
       : isPractice
@@ -81,6 +93,10 @@ function buildAnswer(home: County, peer: County, prompt: string) {
           : 'The peer comparison is mixed; neither county is uniformly stronger across ADAPT’s indicators.';
   const recommendation = isAvoid
     ? `Screen every candidate practice for legal authority, target population, delivery capacity and cost before considering it for ${compactName(home.name)}.`
+    : isEmployment
+      ? 'Compare sector-level hiring demand, programme completion, placement within 90 days and 12-month retention before attributing the employment difference to policy.'
+    : isWage
+      ? 'Compare occupation mix, wage floors, target industries and advancement outcomes for workers without four-year degrees.'
     : isInvestment
       ? 'Compare where education and workforce dollars go—not only the totals—and connect each programme to completion, placement and retention measures.'
       : `Compare programme eligibility, delivery partners, cost per participant and measured employment retention before recommending transfer to ${compactName(home.name)}.`;
@@ -105,6 +121,7 @@ export default function Home() {
   const [catalogStatus, setCatalogStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [theme, setTheme] = useState<Theme>('light');
   const composerRef = useRef<HTMLTextAreaElement>(null);
+  const answerRef = useRef<HTMLElement>(null);
   const countyById = useMemo(() => new Map(counties.map((county) => [county.countyid, county])), [counties]);
 
   useEffect(() => {
@@ -159,6 +176,7 @@ export default function Home() {
     if (!clean) return;
     setPrompt(clean);
     setAsked(clean);
+    window.setTimeout(() => answerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 40);
   }
   function ask(event: FormEvent) { event.preventDefault(); submitQuestion(); }
   function handleComposerKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
@@ -211,8 +229,9 @@ export default function Home() {
             return <div className="metric-card" key={key}><small>{metricLabels[key]}</small><div className="metric-number"><strong>{formatMetric(key, homeValue)}</strong><span>vs {formatMetric(key, peerValue)}</span></div><div className="micro-chart" aria-label={`${metricLabels[key]} comparison`}><div><i style={{ width: `${metricWidth(homeValue, peerValue)}%` }} /><em>{compactName(home.name)}</em></div><div><i style={{ width: `${metricWidth(peerValue, homeValue)}%` }} /><em>{compactName(peer.name)}</em></div></div><p>{home.metrics[key]?.rank ? `Rank ${home.metrics[key].rank}/${home.metrics[key].total} in population group` : 'Comparable county measure'}</p></div>;
           })}</div>
           {asked ? <><div className="question"><span>AD</span><div><small>YOUR QUESTION</small><p>{asked}</p></div></div>
-          <article className="answer-card" aria-live="polite">
+          <article className="answer-card" aria-live="polite" ref={answerRef} tabIndex={-1} key={`${home.countyid}-${peer.countyid}-${asked}`}>
             <div className="answer-head"><span>A</span><div><small>ADAPT-GROUNDED ANALYSIS</small><p>Model facts + official county evidence</p></div></div>
+            <div className="answer-context">Updated for {compactName(home.name)} ↔ {compactName(peer.name)}</div>
             <div className="confidence">Evidence boundary active · comparison, not causal attribution</div>
             <h2>{answer!.title}</h2><p>{answer!.summary} <SourceLink id={1} /></p>
             <h3>What the comparison shows</h3><ul>{answer!.findings.map((finding) => <li key={finding}>{finding} <SourceLink id={1} /></li>)}</ul>

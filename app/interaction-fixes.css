@@ -45,6 +45,29 @@
   background: #f8e9e6;
 }
 
+.answer-card:focus {
+  outline: none;
+}
+
+.answer-context {
+  width: fit-content;
+  margin: 14px 0 0;
+  padding: 6px 9px;
+  border: 1px solid #cfe1d6;
+  border-radius: 999px;
+  background: #eef6f1;
+  color: #2c6b4e;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  animation: answer-arrived 420ms ease-out;
+}
+
+@keyframes answer-arrived {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .top-actions {
   display: flex;
   align-items: center;
@@ -197,6 +220,12 @@ html[data-theme='dark'] .peer-line,
 html[data-theme='dark'] .method-card,
 html[data-theme='dark'] .confidence {
   background: #172d24;
+}
+
+html[data-theme='dark'] .answer-context {
+  border-color: #315846;
+  background: #173629;
+  color: #86d3aa;
 }
 
 html[data-theme='dark'] .method-note,
