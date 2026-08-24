@@ -1,12 +1,13 @@
 'use client';
 
-import { FormEvent, KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { FormEvent, KeyboardEvent, MouseEvent as ReactMouseEvent, useEffect, useMemo, useRef, useState } from 'react';
 import './interaction-fixes.css';
 
 type Metric = { value: number | null; rank?: number; total?: number };
 type Peer = { countyid: number; name: string; state: string; matchTier: string; rucc: number | null; economicType: string; similarWorkforce: boolean };
 type County = { countyid: number; name: string; state: string; populationGroup: string; workers: number | null; metrics: Record<string, Metric>; peer: Peer | null };
 type Source = { id: number; jurisdiction: string; title: string; detail: string; url: string; kind: string; countyids?: number[] };
+type Theme = 'light' | 'dark';
 
 const DEFAULT_COUNTY = 42003;
 const initialCounties: County[] = [
@@ -41,6 +42,12 @@ function formatMetric(key: string, value: number | null) {
 }
 
 function compactName(name: string) { return name.replace(/ County, [A-Z]{2}$/, ''); }
+
+function metricWidth(value: number | null, comparison: number | null) {
+  if (value === null) return 0;
+  const maximum = Math.max(Math.abs(value), Math.abs(comparison ?? 0), 0.0001);
+  return Math.max(6, Math.round((Math.abs(value) / maximum) * 100));
+}
 
 function SourceLink({ id }: { id: number }) {
   const source = sources.find((item) => item.id === id);
@@ -96,8 +103,23 @@ export default function Home() {
   const [prompt, setPrompt] = useState(questions[0]);
   const [asked, setAsked] = useState<string | null>(questions[0]);
   const [catalogStatus, setCatalogStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [theme, setTheme] = useState<Theme>('light');
   const composerRef = useRef<HTMLTextAreaElement>(null);
   const countyById = useMemo(() => new Map(counties.map((county) => [county.countyid, county])), [counties]);
+
+  useEffect(() => {
+    const storedTheme = window.localStorage.getItem('adapt-theme');
+    const preferredTheme: Theme = storedTheme === 'dark' || storedTheme === 'light'
+      ? storedTheme
+      : window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    setTheme(preferredTheme);
+    document.documentElement.dataset.theme = preferredTheme;
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    window.localStorage.setItem('adapt-theme', theme);
+  }, [theme]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -151,6 +173,20 @@ export default function Home() {
     window.setTimeout(() => composerRef.current?.focus(), 0);
   }
 
+  function prepareBriefing(event: ReactMouseEvent<HTMLAnchorElement>) {
+    const reportQuestion = asked || prompt.trim() || questions[0];
+    const reportAnswer = buildAnswer(home, peer, reportQuestion);
+    const payload = {
+      home: { countyid: home.countyid, name: home.name },
+      peer: { countyid: peer.countyid, name: peer.name, mode: peerOverride ? 'Manual comparison' : 'ADAPT computed peer' },
+      question: reportQuestion,
+      answer: reportAnswer,
+      metrics: metricOrder.map((key) => ({ label: metricLabels[key], home: formatMetric(key, home.metrics[key]?.value ?? null), peer: formatMetric(key, peer.metrics[key]?.value ?? null) })),
+      sources: displayedSources.map(({ title, jurisdiction, kind, url }) => ({ title, jurisdiction, kind, url })),
+    };
+    event.currentTarget.href = `/briefing?payload=${encodeURIComponent(JSON.stringify(payload))}`;
+  }
+
   return <main className="app-shell">
     <aside className="sidebar">
       <div className="brand"><span>A</span><div><strong>AdapT</strong><small>County intelligence</small></div></div>
@@ -160,7 +196,7 @@ export default function Home() {
     </aside>
 
     <section className="workspace" id="comparison">
-      <header className="topbar"><div><small>AMERICAN DREAM ACHIEVABILITY PROGRESS TRACKER</small><h1>Peer-county policy intelligence</h1></div><span className={`verified ${catalogStatus}`}>● {catalogStatus === 'ready' ? `${counties.length.toLocaleString()} counties loaded` : catalogStatus === 'error' ? 'County catalog unavailable' : 'Loading county catalog…'}</span></header>
+      <header className="topbar"><div><small>AMERICAN DREAM ACHIEVABILITY PROGRESS TRACKER</small><h1>Peer-county policy intelligence</h1></div><div className="top-actions"><span className={`verified ${catalogStatus}`}>● {catalogStatus === 'ready' ? `${counties.length.toLocaleString()} counties loaded` : catalogStatus === 'error' ? 'County catalog unavailable' : 'Loading county catalog…'}</span><button className="theme-toggle" type="button" aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`} aria-pressed={theme === 'dark'} onClick={() => setTheme((current) => current === 'light' ? 'dark' : 'light')}>{theme === 'light' ? '◐ Dark' : '☀ Light'}</button><a className="download-briefing" href="data:text/plain,Preparing%20briefing" download={`adapt-briefing-${String(home.countyid).padStart(5, '0')}-${String(peer.countyid).padStart(5, '0')}.html`} onClick={prepareBriefing}>↓ Download briefing</a></div></header>
       <div className="content-grid">
         <section className="conversation">
           <div className="context-card">
@@ -169,7 +205,11 @@ export default function Home() {
             <p className="method-note">Peers are matched on rural–urban classification, economic type, education classification and closest 2022 workforce size. Manual comparisons are clearly labelled.</p>
           </div>
 
-          <div className="metric-grid">{metricOrder.map((key) => <div className="metric-card" key={key}><small>{metricLabels[key]}</small><div><strong>{formatMetric(key, home.metrics[key]?.value ?? null)}</strong><span>vs {formatMetric(key, peer.metrics[key]?.value ?? null)}</span></div><p>{home.metrics[key]?.rank ? `Rank ${home.metrics[key].rank}/${home.metrics[key].total} in population group` : 'Comparable county measure'}</p></div>)}</div>
+          <div className="metric-grid">{metricOrder.map((key) => {
+            const homeValue = home.metrics[key]?.value ?? null;
+            const peerValue = peer.metrics[key]?.value ?? null;
+            return <div className="metric-card" key={key}><small>{metricLabels[key]}</small><div className="metric-number"><strong>{formatMetric(key, homeValue)}</strong><span>vs {formatMetric(key, peerValue)}</span></div><div className="micro-chart" aria-label={`${metricLabels[key]} comparison`}><div><i style={{ width: `${metricWidth(homeValue, peerValue)}%` }} /><em>{compactName(home.name)}</em></div><div><i style={{ width: `${metricWidth(peerValue, homeValue)}%` }} /><em>{compactName(peer.name)}</em></div></div><p>{home.metrics[key]?.rank ? `Rank ${home.metrics[key].rank}/${home.metrics[key].total} in population group` : 'Comparable county measure'}</p></div>;
+          })}</div>
           {asked ? <><div className="question"><span>AD</span><div><small>YOUR QUESTION</small><p>{asked}</p></div></div>
           <article className="answer-card" aria-live="polite">
             <div className="answer-head"><span>A</span><div><small>ADAPT-GROUNDED ANALYSIS</small><p>Model facts + official county evidence</p></div></div>

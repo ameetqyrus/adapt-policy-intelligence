@@ -44,3 +44,225 @@
   color: #8b3f35;
   background: #f8e9e6;
 }
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.theme-toggle,
+.download-briefing {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--white);
+  color: var(--ink);
+  font-size: 9px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.download-briefing {
+  border-color: var(--green);
+  background: var(--green);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.theme-toggle:hover,
+.download-briefing:hover,
+.suggestions button:hover,
+.new-question:hover {
+  transform: translateY(-1px);
+}
+
+.theme-toggle:focus-visible,
+.download-briefing:focus-visible,
+.restore-peer:focus-visible,
+.suggestions button:focus-visible,
+.composer button:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid #e9c86d;
+  outline-offset: 2px;
+}
+
+.metric-card {
+  overflow: hidden;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 9px 24px rgba(22, 58, 44, 0.09);
+}
+
+.metric-card .metric-number {
+  margin: 6px 0 9px;
+}
+
+.micro-chart {
+  display: grid;
+  gap: 5px;
+  margin-bottom: 9px;
+}
+
+.micro-chart > div {
+  position: relative;
+  height: 7px;
+  overflow: visible;
+  border-radius: 20px;
+  background: #edf2ee;
+}
+
+.micro-chart i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  display: block;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #1f6a4d, #58a37e);
+}
+
+.micro-chart > div:nth-child(2) i {
+  background: linear-gradient(90deg, #c29435, #e9c86d);
+}
+
+.micro-chart em {
+  position: absolute;
+  right: 0;
+  top: -1px;
+  color: transparent;
+  font-size: 6px;
+  font-style: normal;
+}
+
+html,
+body,
+.topbar,
+.context-card,
+.answer-card,
+.metric-card,
+.evidence-panel,
+.source-list > a,
+.composer,
+.theme-toggle,
+.suggestions button,
+select,
+textarea {
+  transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease;
+}
+
+html[data-theme='dark'] {
+  color-scheme: dark;
+  --ink: #edf6f0;
+  --muted: #9eb1a7;
+  --green: #67c294;
+  --green-2: #183d30;
+  --paper: #0e1713;
+  --line: #294139;
+  --white: #14231d;
+}
+
+html[data-theme='dark'] body {
+  background: #0e1713;
+}
+
+html[data-theme='dark'] .sidebar {
+  background: #0b2a20;
+}
+
+html[data-theme='dark'] .topbar {
+  background: rgba(14, 23, 19, 0.92);
+}
+
+html[data-theme='dark'] .context-card,
+html[data-theme='dark'] .answer-card,
+html[data-theme='dark'] .metric-card,
+html[data-theme='dark'] .evidence-panel,
+html[data-theme='dark'] .source-list > a,
+html[data-theme='dark'] .composer,
+html[data-theme='dark'] .suggestions button,
+html[data-theme='dark'] .theme-toggle,
+html[data-theme='dark'] select,
+html[data-theme='dark'] textarea {
+  background: #14231d;
+  color: #edf6f0;
+}
+
+html[data-theme='dark'] .peer-line,
+html[data-theme='dark'] .method-card,
+html[data-theme='dark'] .confidence {
+  background: #172d24;
+}
+
+html[data-theme='dark'] .method-note,
+html[data-theme='dark'] .policy-grid > div,
+html[data-theme='dark'] .empty-answer {
+  background: #111f19;
+}
+
+html[data-theme='dark'] .recommendation {
+  background: #352d18;
+}
+
+html[data-theme='dark'] .recommendation strong,
+html[data-theme='dark'] .recommendation p {
+  color: #ead18d;
+}
+
+html[data-theme='dark'] .micro-chart > div {
+  background: #243c32;
+}
+
+html[data-theme='dark'] .metric-card:hover {
+  box-shadow: 0 9px 26px rgba(0, 0, 0, 0.26);
+}
+
+@media (max-width: 900px) {
+  .top-actions .verified {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .topbar {
+    height: auto;
+    min-height: 74px;
+    gap: 10px;
+  }
+
+  .topbar h1 {
+    font-size: 16px;
+  }
+
+  .top-actions {
+    gap: 5px;
+  }
+
+  .theme-toggle,
+  .download-briefing {
+    width: 36px;
+    padding: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-indent: -999px;
+  }
+
+  .theme-toggle::after {
+    content: '◐';
+    display: block;
+    text-indent: 0;
+    font-size: 15px;
+  }
+
+  .download-briefing::after {
+    content: '↓';
+    display: block;
+    text-indent: 0;
+    font-size: 17px;
+  }
+}
