@@ -120,6 +120,8 @@ export default function Home() {
   const [asked, setAsked] = useState<string | null>(questions[0]);
   const [catalogStatus, setCatalogStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [theme, setTheme] = useState<Theme>('light');
+  const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
+  const [responseVersion, setResponseVersion] = useState(0);
   const composerRef = useRef<HTMLTextAreaElement>(null);
   const answerRef = useRef<HTMLElement>(null);
   const countyById = useMemo(() => new Map(counties.map((county) => [county.countyid, county])), [counties]);
@@ -176,7 +178,14 @@ export default function Home() {
     if (!clean) return;
     setPrompt(clean);
     setAsked(clean);
+    setSelectedPreset(null);
+    setResponseVersion((current) => current + 1);
     window.setTimeout(() => answerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 40);
+  }
+  function choosePreset(question: string) {
+    setPrompt(question);
+    setSelectedPreset(question);
+    window.setTimeout(() => composerRef.current?.focus(), 0);
   }
   function ask(event: FormEvent) { event.preventDefault(); submitQuestion(); }
   function handleComposerKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
@@ -188,6 +197,7 @@ export default function Home() {
   function startNewQuestion() {
     setPrompt('');
     setAsked(null);
+    setSelectedPreset(null);
     window.setTimeout(() => composerRef.current?.focus(), 0);
   }
 
@@ -229,7 +239,7 @@ export default function Home() {
             return <div className="metric-card" key={key}><small>{metricLabels[key]}</small><div className="metric-number"><strong>{formatMetric(key, homeValue)}</strong><span>vs {formatMetric(key, peerValue)}</span></div><div className="micro-chart" aria-label={`${metricLabels[key]} comparison`}><div><i style={{ width: `${metricWidth(homeValue, peerValue)}%` }} /><em>{compactName(home.name)}</em></div><div><i style={{ width: `${metricWidth(peerValue, homeValue)}%` }} /><em>{compactName(peer.name)}</em></div></div><p>{home.metrics[key]?.rank ? `Rank ${home.metrics[key].rank}/${home.metrics[key].total} in population group` : 'Comparable county measure'}</p></div>;
           })}</div>
           {asked ? <><div className="question"><span>AD</span><div><small>YOUR QUESTION</small><p>{asked}</p></div></div>
-          <article className="answer-card" aria-live="polite" ref={answerRef} tabIndex={-1} key={`${home.countyid}-${peer.countyid}-${asked}`}>
+          <article className="answer-card" aria-live="polite" ref={answerRef} tabIndex={-1} key={`${home.countyid}-${peer.countyid}-${asked}-${responseVersion}`}>
             <div className="answer-head"><span>A</span><div><small>ADAPT-GROUNDED ANALYSIS</small><p>Model facts + official county evidence</p></div></div>
             <div className="answer-context">Updated for {compactName(home.name)} ↔ {compactName(peer.name)}</div>
             <div className="confidence">Evidence boundary active · comparison, not causal attribution</div>
@@ -238,8 +248,9 @@ export default function Home() {
             {pairHasCuratedEvidence ? <div className="policy-grid"><div><small>ALLEGHENY</small><strong>Current direction</strong><p>All In Allegheny connects education, youth investment, workforce development and equitable growth. <SourceLink id={2} /> The county is also developing a comprehensive investment framework. <SourceLink id={3} /></p></div><div><small>SALT LAKE</small><strong>Practices to investigate</strong><p>Salt Lake County combines regional economic-development research with workforce programmes that track training completion, hiring and retention. <SourceLink id={4} /> <SourceLink id={5} /> <SourceLink id={6} /></p></div></div> : <div className="policy-grid evidence-gap"><div><small>{compactName(home.name).toUpperCase()}</small><strong>Official evidence needed</strong><p>The ADAPT comparison is available, but an approved county source catalog has not yet been connected for this jurisdiction.</p></div><div><small>{compactName(peer.name).toUpperCase()}</small><strong>No policy claim generated</strong><p>Add official plans, budgets, programme evaluations and legislation before drawing a substantive conclusion.</p></div></div>}
             <div className="recommendation"><strong>Recommended next step</strong><p>{answer!.recommendation}</p></div>
           </article></> : <div className="empty-answer" aria-live="polite"><strong>Start a new county question</strong><p>Choose a prompt below or write your own. Press Enter to submit; Shift + Enter adds a new line.</p></div>}
-          <div className="suggestions">{questions.map((question) => <button type="button" key={question} onClick={() => submitQuestion(question)}>{question} →</button>)}</div>
-          <form className="composer" onSubmit={ask}><textarea ref={composerRef} aria-label="Ask a county policy question" rows={2} value={prompt} onKeyDown={handleComposerKeyDown} onChange={(event) => setPrompt(event.target.value)} placeholder={`Ask about ${compactName(home.name)} and ${compactName(peer.name)}…`} /><button type="submit" aria-label="Send question" disabled={!prompt.trim()}>↑</button></form>
+          <div className="suggestions">{questions.map((question) => <button className={selectedPreset === question ? 'selected' : ''} type="button" aria-pressed={selectedPreset === question} key={question} onClick={() => choosePreset(question)}>{question} →</button>)}</div>
+          {selectedPreset && <p className="preset-hint" role="status">Preset selected — press Send to update the analysis.</p>}
+          <form className="composer" onSubmit={ask}><textarea ref={composerRef} aria-label="Ask a county policy question" rows={2} value={prompt} onKeyDown={handleComposerKeyDown} onChange={(event) => { setPrompt(event.target.value); setSelectedPreset(null); }} placeholder={`Ask about ${compactName(home.name)} and ${compactName(peer.name)}…`} /><button type="submit" aria-label="Send question" disabled={!prompt.trim()}>↑</button></form>
         </section>
 
         <aside className="evidence-panel" id="evidence"><div className="evidence-heading"><div><small>EVIDENCE</small><h2>{displayedSources.length} connected sources</h2></div><span>Verified links</span></div><div className="source-list">{displayedSources.map((source) => <a href={source.url} target="_blank" rel="noreferrer" key={source.id}><span>{source.id}</span><div><small>{source.jurisdiction} · {source.kind}</small><strong>{source.title}</strong><p>{source.detail}</p></div><b>↗</b></a>)}</div><div className="method-card" id="method"><strong>How this answer is built</strong><ol><li>Load the selected ADAPT county and peer.</li><li>Separate model facts from policy evidence.</li><li>Route to official county sources.</li><li>Flag causal and transferability limits.</li></ol></div></aside>
