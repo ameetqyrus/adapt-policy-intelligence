@@ -8,6 +8,7 @@ type Peer = { countyid: number; name: string; state: string; matchTier: string; 
 type County = { countyid: number; name: string; state: string; populationGroup: string; workers: number | null; metrics: Record<string, Metric>; peer: Peer | null };
 type Source = { id: number; jurisdiction: string; title: string; detail: string; url: string; kind: string; countyids?: number[] };
 type Theme = 'light' | 'dark';
+type ChatMessage = { role: 'user' | 'assistant'; content: string; citations?: Array<{ title: string; url: string }> };
 
 const DEFAULT_COUNTY = 42003;
 const initialCounties: County[] = [
@@ -188,6 +189,88 @@ function buildAnswer(home: County, peer: County, prompt: string) {
   };
 }
 
+function AiChat({ context }: { context: Record<string, unknown> }) {
+  const [apiKey, setApiKey] = useState('');
+  const [keyDraft, setKeyDraft] = useState('');
+  const [model, setModel] = useState('gpt-5.6-luna');
+  const [research, setResearch] = useState(false);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const storedKey = window.sessionStorage.getItem('adapt-openai-key') ?? '';
+    const storedModel = window.sessionStorage.getItem('adapt-openai-model') ?? 'gpt-5.6-luna';
+    // Browser-tab configuration is restored only after hydration.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setApiKey(storedKey);
+    setKeyDraft(storedKey);
+    setModel(storedModel);
+  }, []);
+
+  function connectKey(event: FormEvent) {
+    event.preventDefault();
+    const clean = keyDraft.trim();
+    if (!clean.startsWith('sk-')) { setError('Enter an OpenAI API key beginning with sk-.'); return; }
+    window.sessionStorage.setItem('adapt-openai-key', clean);
+    window.sessionStorage.setItem('adapt-openai-model', model);
+    setApiKey(clean);
+    setError('');
+  }
+
+  function disconnectKey() {
+    window.sessionStorage.removeItem('adapt-openai-key');
+    setApiKey('');
+    setKeyDraft('');
+    setMessages([]);
+    setError('');
+  }
+
+  async function sendMessage(event: FormEvent) {
+    event.preventDefault();
+    const clean = message.trim();
+    if (!clean || loading || !apiKey) return;
+    const prior = messages.map(({ role, content }) => ({ role, content }));
+    setMessages((current) => [...current, { role: 'user', content: clean }]);
+    setMessage('');
+    setLoading(true);
+    setError('');
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-openai-key': apiKey },
+        body: JSON.stringify({ model, research, message: clean, history: prior, context }),
+      });
+      const result = await response.json() as { text?: string; citations?: Array<{ title: string; url: string }>; error?: string };
+      if (!response.ok || !result.text) throw new Error(result.error || 'OpenAI could not answer this question.');
+      setMessages((current) => [...current, { role: 'assistant', content: result.text!, citations: result.citations }]);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'OpenAI could not answer this question.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return <section className="ai-chat" aria-label="AI follow-up conversation">
+    <header className="ai-chat-head"><div><small>OPENAI-POWERED FOLLOW-UP</small><h2>Chat about this answer</h2><p>The AI receives this county pair, its metrics, the baseline answer, and prior turns.</p></div><span className={apiKey ? 'connected' : ''}>{apiKey ? '● Connected for this tab' : 'Key required'}</span></header>
+    {!apiKey ? <form className="ai-key-form" onSubmit={connectKey}>
+      <div><label htmlFor="openai-key">OpenAI API key</label><input id="openai-key" type="password" autoComplete="off" value={keyDraft} onChange={(event) => setKeyDraft(event.target.value)} placeholder="sk-…" /></div>
+      <div><label htmlFor="openai-model">Model</label><select id="openai-model" value={model} onChange={(event) => setModel(event.target.value)}><option value="gpt-5.6-luna">GPT-5.6 Luna · lowest cost</option><option value="gpt-5.6-terra">GPT-5.6 Terra · balanced</option><option value="gpt-5.6-sol">GPT-5.6 Sol · strongest</option><option value="gpt-5.4-mini">GPT-5.4 Mini · compatibility</option></select></div>
+      <button type="submit">Connect key</button>
+      <p>Your key stays in this browser tab’s session storage and is sent only to this site’s server and OpenAI for each chat request. Use a restricted project key. <a href="https://platform.openai.com/api-keys" target="_blank" rel="noreferrer">Manage keys ↗</a></p>
+      {error && <div className="ai-error" role="alert">{error}</div>}
+    </form> : <>
+      <div className="ai-controls"><label><input type="checkbox" checked={research} onChange={(event) => setResearch(event.target.checked)} /> Allow official-web research <span>May add tool usage cost</span></label><div><strong>{model}</strong><button type="button" onClick={disconnectKey}>Disconnect key</button></div></div>
+      {!messages.length && <div className="ai-starters"><button type="button" onClick={() => setMessage('Explain the strongest evidence behind this answer and the biggest uncertainty.')}>Evidence and uncertainty</button><button type="button" onClick={() => setMessage('What should a county official investigate next before acting on this comparison?')}>Next investigation</button><button type="button" onClick={() => setMessage('Challenge the baseline answer. What alternative explanations fit these metrics?')}>Challenge the answer</button></div>}
+      <div className="ai-messages" aria-live="polite">{messages.map((item, index) => <div className={`ai-message ${item.role}`} key={`${item.role}-${index}`}><small>{item.role === 'user' ? 'YOU' : 'AI POLICY ANALYST'}</small><p>{item.content}</p>{item.citations && item.citations.length > 0 && <div className="ai-citations">{item.citations.map((citation) => <a href={citation.url} target="_blank" rel="noreferrer" key={citation.url}>{citation.title} ↗</a>)}</div>}</div>)}{loading && <div className="ai-message assistant thinking"><small>AI POLICY ANALYST</small><p>Reviewing the comparison and evidence…</p></div>}</div>
+      {error && <div className="ai-error" role="alert">{error}</div>}
+      <form className="ai-composer" onSubmit={sendMessage}><textarea aria-label="Ask an AI follow-up" rows={2} value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Ask a follow-up about this answer…" /><button type="submit" disabled={!message.trim() || loading}>{loading ? '…' : 'Ask AI'}</button></form>
+      <p className="ai-disclaimer">AI can make mistakes. Verify policy claims in the linked primary sources; county comparisons do not establish causation.</p>
+    </>}
+  </section>;
+}
+
 export default function Home() {
   const [counties, setCounties] = useState<County[]>(initialCounties);
   const [homeId, setHomeId] = useState(DEFAULT_COUNTY);
@@ -248,6 +331,15 @@ export default function Home() {
   const pairHasCuratedEvidence = new Set([home.countyid, peer.countyid]).size === 2
     && [42003, 49035].every((countyid) => countyid === home.countyid || countyid === peer.countyid);
   const displayedSources = sources.filter((source) => !source.countyids || source.countyids.some((countyid) => countyid === home.countyid || countyid === peer.countyid));
+  const aiContext = answer ? {
+    home: { countyid: home.countyid, name: home.name, populationGroup: home.populationGroup, workers: home.workers },
+    peer: { countyid: peer.countyid, name: peer.name, selection: peerOverride ? 'manual comparison' : 'ADAPT computed peer', match: home.peer },
+    submittedQuestion: asked,
+    baselineAnswer: answer,
+    metrics: metricOrder.map((key) => ({ key, label: metricLabels[key], home: home.metrics[key] ?? null, peer: peer.metrics[key] ?? null })),
+    curatedSources: displayedSources.map(({ id, jurisdiction, title, detail, kind, url }) => ({ id, jurisdiction, title, detail, kind, url })),
+    evidenceBoundary: pairHasCuratedEvidence ? 'Curated narrative is available for this pair.' : 'No approved county-specific policy narrative is connected for this pair.',
+  } : null;
   useEffect(() => {
     const params = new URLSearchParams();
     params.set('county', String(home.countyid).padStart(5, '0'));
@@ -330,7 +422,7 @@ export default function Home() {
             <h3>What the comparison shows</h3><ul>{answer!.findings.map((finding) => <li key={finding}>{finding} <SourceLink id={1} /></li>)}</ul>
             {pairHasCuratedEvidence ? <div className="policy-grid"><div><small>ALLEGHENY</small><strong>Current direction</strong><p>All In Allegheny connects education, youth investment, workforce development and equitable growth. <SourceLink id={2} /> The county is also developing a comprehensive investment framework. <SourceLink id={3} /></p></div><div><small>SALT LAKE</small><strong>Practices to investigate</strong><p>Salt Lake County combines regional economic-development research with workforce programmes that track training completion, hiring and retention. <SourceLink id={4} /> <SourceLink id={5} /> <SourceLink id={6} /></p></div></div> : <div className="policy-grid evidence-gap"><div><small>{compactName(home.name).toUpperCase()}</small><strong>Official evidence needed</strong><p>The ADAPT comparison is available, but an approved county source catalog has not yet been connected for this jurisdiction.</p></div><div><small>{compactName(peer.name).toUpperCase()}</small><strong>No policy claim generated</strong><p>Add official plans, budgets, programme evaluations and legislation before drawing a substantive conclusion.</p></div></div>}
             <div className="recommendation"><strong>Recommended next step</strong><p>{answer!.recommendation}</p></div>
-          </article></> : <div className="empty-answer" aria-live="polite"><strong>Start a new county question</strong><p>Choose a prompt below or write your own. Press Enter to submit; Shift + Enter adds a new line.</p></div>}
+          </article>{aiContext && <AiChat key={`${home.countyid}-${peer.countyid}-${asked}`} context={aiContext} />}</> : <div className="empty-answer" aria-live="polite"><strong>Start a new county question</strong><p>Choose a prompt below or write your own. Press Enter to submit; Shift + Enter adds a new line.</p></div>}
           <div className="suggestions">{questions.map((question) => <button className={selectedPreset === question ? 'selected' : ''} type="button" aria-pressed={selectedPreset === question} key={question} onClick={() => choosePreset(question)}>{question} →</button>)}</div>
           {selectedPreset && <p className="preset-hint" role="status">Preset selected — press Send to update the analysis.</p>}
           <form className="composer" onSubmit={ask}><textarea ref={composerRef} aria-label="Ask a county policy question" rows={2} value={prompt} onKeyDown={handleComposerKeyDown} onChange={(event) => { setPrompt(event.target.value); setSelectedPreset(null); }} placeholder={`Ask about ${compactName(home.name)} and ${compactName(peer.name)}…`} /><button type="submit" aria-label="Send question" disabled={!prompt.trim()}>↑</button></form>
