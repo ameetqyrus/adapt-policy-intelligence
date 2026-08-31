@@ -55,6 +55,82 @@ function SourceLink({ id }: { id: number }) {
   return <a className="citation" href={source.url} target="_blank" rel="noreferrer" aria-label={`Open source ${id}: ${source.title}`}>[{id}]</a>;
 }
 
+function CountyPicker({ id, label, counties, value, onChange }: { id: string; label: string; counties: County[]; value: number; onChange: (countyid: number) => void }) {
+  const selected = counties.find((county) => county.countyid === value);
+  const [query, setQuery] = useState(selected?.name ?? '');
+  const [open, setOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const matches = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    if (!needle) return counties.slice(0, 18);
+    return counties.filter((county) => {
+      const fips = String(county.countyid).padStart(5, '0');
+      return county.name.toLowerCase().includes(needle) || county.state.toLowerCase().includes(needle) || fips.includes(needle);
+    }).slice(0, 18);
+  }, [counties, query]);
+
+  function choose(county: County) {
+    setQuery(county.name);
+    setOpen(false);
+    onChange(county.countyid);
+  }
+
+  function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      setOpen(true);
+      setActiveIndex((current) => Math.min(current + 1, Math.max(matches.length - 1, 0)));
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      setOpen(true);
+      setActiveIndex((current) => Math.max(current - 1, 0));
+    } else if (event.key === 'Enter' && open && matches[activeIndex]) {
+      event.preventDefault();
+      choose(matches[activeIndex]);
+    } else if (event.key === 'Escape') {
+      setOpen(false);
+      setQuery(selected?.name ?? '');
+    }
+  }
+
+  const listId = `${id}-results`;
+  return <div className="picker-field">
+    <label htmlFor={id}>{label}</label>
+    <div className="county-search-wrap">
+      <span className="county-search-icon" aria-hidden="true">⌕</span>
+      <input
+        id={id}
+        className="county-search-input"
+        role="combobox"
+        aria-autocomplete="list"
+        aria-expanded={open}
+        aria-controls={listId}
+        aria-activedescendant={open && matches[activeIndex] ? `${id}-option-${matches[activeIndex].countyid}` : undefined}
+        autoComplete="off"
+        value={query}
+        onFocus={(event) => { event.currentTarget.select(); setActiveIndex(0); setOpen(true); }}
+        onBlur={() => window.setTimeout(() => { setOpen(false); setQuery(selected?.name ?? ''); }, 120)}
+        onChange={(event) => { setQuery(event.target.value); setActiveIndex(0); setOpen(true); }}
+        onKeyDown={handleKeyDown}
+        placeholder="Search county, state, or FIPS"
+      />
+      {open && <div className="county-results" id={listId} role="listbox">
+        {matches.length ? matches.map((county, index) => <button
+          id={`${id}-option-${county.countyid}`}
+          className={`county-option${index === activeIndex ? ' active' : ''}${county.countyid === value ? ' selected' : ''}`}
+          type="button"
+          role="option"
+          aria-selected={county.countyid === value}
+          key={county.countyid}
+          onMouseEnter={() => setActiveIndex(index)}
+          onMouseDown={(event) => { event.preventDefault(); choose(county); }}
+        ><span>{county.name}</span><small>FIPS {String(county.countyid).padStart(5, '0')}</small></button>) : <p className="county-empty">No matching county. Try a county name, state code, or FIPS.</p>}
+      </div>}
+    </div>
+  </div>;
+}
+
 function buildAnswer(home: County, peer: County, prompt: string) {
   const lower = prompt.toLowerCase();
   const homeWage = home.metrics.star_median2022?.value;
@@ -131,6 +207,8 @@ export default function Home() {
     const preferredTheme: Theme = storedTheme === 'dark' || storedTheme === 'light'
       ? storedTheme
       : window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    // Theme preference is browser-only state and is synchronized after hydration.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTheme(preferredTheme);
     document.documentElement.dataset.theme = preferredTheme;
   }, []);
@@ -143,7 +221,12 @@ export default function Home() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const requestedQuestion = params.get('question');
-    if (requestedQuestion) { setPrompt(requestedQuestion); setAsked(requestedQuestion); }
+    if (requestedQuestion) {
+      // URL state is browser-only and is synchronized after hydration.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setPrompt(requestedQuestion);
+      setAsked(requestedQuestion);
+    }
     fetch('/data/county-context.json')
       .then((response) => response.ok ? response.json() : Promise.reject(new Error('County context unavailable')))
       .then((bundle: { counties: County[] }) => {
@@ -228,8 +311,8 @@ export default function Home() {
       <div className="content-grid">
         <section className="conversation">
           <div className="context-card">
-            <div className="context-title"><div><small>HOME COUNTY</small><h2>{home.name}</h2></div><label>Change county<select value={homeId} onChange={(event) => { setHomeId(Number(event.target.value)); setPeerOverride(null); }}>{counties.map((county) => <option key={county.countyid} value={county.countyid}>{county.name}</option>)}</select></label></div>
-            <div className="peer-line"><span>↔</span><div><small>{peerOverride ? 'MANUAL COMPARISON' : 'ADAPT COMPUTED PEER'}</small><strong>{peer.name}</strong><p>{home.peer?.economicType || 'Comparable economic structure'} · RUCC {home.peer?.rucc ?? 'n/a'} · similar workforce size</p>{peerOverride && <button className="restore-peer" type="button" onClick={() => setPeerOverride(null)}>Use ADAPT computed peer</button>}</div><label>Compare<select value={peer.countyid} onChange={(event) => setPeerOverride(Number(event.target.value))}>{counties.map((county) => <option key={county.countyid} value={county.countyid}>{county.name}</option>)}</select></label></div>
+            <div className="context-title"><div><small>HOME COUNTY</small><h2>{home.name}</h2></div><CountyPicker key={`home-${homeId}`} id="home-county" label="Change county" counties={counties} value={homeId} onChange={(countyid) => { setHomeId(countyid); setPeerOverride(null); }} /></div>
+            <div className="peer-line"><span>↔</span><div><small>{peerOverride ? 'MANUAL COMPARISON' : 'ADAPT COMPUTED PEER'}</small><strong>{peer.name}</strong><p>{home.peer?.economicType || 'Comparable economic structure'} · RUCC {home.peer?.rucc ?? 'n/a'} · similar workforce size</p>{peerOverride && <button className="restore-peer" type="button" onClick={() => setPeerOverride(null)}>Use ADAPT computed peer</button>}</div><CountyPicker key={`peer-${peer.countyid}`} id="peer-county" label="Compare" counties={counties} value={peer.countyid} onChange={setPeerOverride} /></div>
             <p className="method-note">Peers are matched on rural–urban classification, economic type, education classification and closest 2022 workforce size. Manual comparisons are clearly labelled.</p>
           </div>
 

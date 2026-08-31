@@ -310,3 +310,341 @@ html[data-theme='dark'] .metric-card:hover {
     font-size: 17px;
   }
 }
+
+/* adaptdashboard.com visual system: navy, slate, gold and map-series colors. */
+:root {
+  --ink: #091e3f;
+  --muted: #626a75;
+  --green: #2e405c;
+  --green-2: #eef2f6;
+  --paper: #f5f6f8;
+  --line: #d8dde4;
+  --white: #ffffff;
+  --adapt-gold: #eedb9f;
+  --adapt-red: #c83b35;
+  --adapt-orange: #ef8c3b;
+  --adapt-cream: #eed9a3;
+  --adapt-sky: #7fb0d2;
+  --adapt-blue: #1a5b8f;
+}
+
+.sidebar {
+  background: #091e3f;
+}
+
+.brand > span,
+.answer-head > span {
+  border-radius: 3px;
+  background: var(--adapt-gold);
+  color: #091e3f;
+}
+
+.brand small,
+.sidebar-note p {
+  color: #b9c5d4;
+}
+
+.new-question {
+  border-color: #66768d;
+  border-radius: 3px;
+  background: #2e405c;
+}
+
+.sidebar nav a {
+  border-radius: 3px;
+  color: #c8d1dd;
+}
+
+.sidebar nav a.active {
+  background: #2e405c;
+}
+
+.sidebar-note {
+  border-color: #41536c;
+  border-radius: 3px;
+  background: #132a4c;
+}
+
+.topbar {
+  background: rgba(255, 255, 255, 0.94);
+}
+
+.context-card,
+.answer-card {
+  overflow: visible;
+  border-radius: 4px;
+  box-shadow: 0 5px 20px rgba(9, 30, 63, 0.05);
+}
+
+.metric-card,
+.source-list > a,
+.policy-grid > div,
+.composer,
+.method-card,
+.empty-answer,
+.theme-toggle,
+.download-briefing,
+.suggestions button {
+  border-radius: 4px;
+}
+
+.peer-line {
+  background: #f1f3f6;
+}
+
+.peer-line > span,
+.question > span {
+  border-radius: 3px;
+  background: #dce5ef;
+  color: #1a5b8f;
+}
+
+.method-note,
+.policy-grid > div,
+.empty-answer {
+  background: #fafbfc;
+}
+
+.recommendation {
+  border-left-color: var(--adapt-gold);
+  background: #f8f5e9;
+}
+
+.recommendation strong,
+.recommendation p {
+  color: #604e1d;
+}
+
+.answer-context {
+  border-color: #c8d5e3;
+  border-radius: 3px;
+  background: #eef3f8;
+  color: #1a5b8f;
+}
+
+.confidence,
+.verified {
+  border-radius: 3px;
+  background: #eef2f6;
+  color: #2e405c;
+}
+
+.download-briefing {
+  border-color: #091e3f;
+  background: #091e3f;
+}
+
+.micro-chart > div {
+  border-radius: 2px;
+  background: #e9edf2;
+}
+
+.micro-chart i {
+  background: linear-gradient(90deg, var(--adapt-blue), var(--adapt-sky));
+}
+
+.micro-chart > div:nth-child(2) i {
+  background: linear-gradient(90deg, var(--adapt-red), var(--adapt-orange) 58%, var(--adapt-cream));
+}
+
+.picker-field {
+  width: 220px;
+  flex: 0 0 220px;
+  color: #626a75;
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.picker-field > label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 700;
+}
+
+.county-search-wrap {
+  position: relative;
+  z-index: 20;
+}
+
+.county-search-icon {
+  position: absolute;
+  z-index: 1;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #63748a;
+  font-size: 14px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.county-search-input {
+  width: 100%;
+  min-height: 34px;
+  padding: 8px 9px 8px 30px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--white);
+  color: var(--ink);
+  font-size: 10px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.county-search-input:focus {
+  border-color: #2e405c;
+  outline: 3px solid rgba(238, 219, 159, 0.75);
+  outline-offset: 1px;
+}
+
+.county-results {
+  position: absolute;
+  z-index: 80;
+  top: calc(100% + 4px);
+  right: 0;
+  width: min(330px, 86vw);
+  max-height: 286px;
+  overflow-y: auto;
+  padding: 4px;
+  border: 1px solid #c9d0da;
+  border-radius: 3px;
+  background: var(--white);
+  box-shadow: 0 14px 34px rgba(9, 30, 63, 0.18);
+  text-align: left;
+}
+
+.county-option {
+  width: 100%;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 2px;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.county-option span {
+  overflow: hidden;
+  font-size: 10px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  text-transform: none;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.county-option small {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 8px;
+  letter-spacing: 0.04em;
+}
+
+.county-option.active {
+  background: #eef2f6;
+}
+
+.county-option.selected {
+  box-shadow: inset 3px 0 var(--adapt-gold);
+}
+
+.county-empty {
+  margin: 0;
+  padding: 14px 10px;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.5;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+html[data-theme='dark'] {
+  --ink: #f2f5f9;
+  --muted: #aab5c4;
+  --green: #8bb7d6;
+  --green-2: #152943;
+  --paper: #071326;
+  --line: #2b405f;
+  --white: #0f2038;
+}
+
+html[data-theme='dark'] body {
+  background: #071326;
+}
+
+html[data-theme='dark'] .sidebar {
+  background: #050f20;
+}
+
+html[data-theme='dark'] .topbar {
+  background: rgba(7, 19, 38, 0.94);
+}
+
+html[data-theme='dark'] .context-card,
+html[data-theme='dark'] .answer-card,
+html[data-theme='dark'] .metric-card,
+html[data-theme='dark'] .evidence-panel,
+html[data-theme='dark'] .source-list > a,
+html[data-theme='dark'] .composer,
+html[data-theme='dark'] .suggestions button,
+html[data-theme='dark'] .theme-toggle,
+html[data-theme='dark'] textarea,
+html[data-theme='dark'] .county-search-input,
+html[data-theme='dark'] .county-results {
+  background: #0f2038;
+  color: #f2f5f9;
+}
+
+html[data-theme='dark'] .peer-line,
+html[data-theme='dark'] .method-card,
+html[data-theme='dark'] .confidence,
+html[data-theme='dark'] .county-option.active {
+  background: #152943;
+}
+
+html[data-theme='dark'] .method-note,
+html[data-theme='dark'] .policy-grid > div,
+html[data-theme='dark'] .empty-answer {
+  background: #0b1a30;
+}
+
+html[data-theme='dark'] .answer-context {
+  border-color: #365678;
+  background: #132b49;
+  color: #8bb7d6;
+}
+
+html[data-theme='dark'] .recommendation {
+  background: #332c19;
+}
+
+html[data-theme='dark'] .micro-chart > div {
+  background: #233954;
+}
+
+@media (max-width: 760px) {
+  .context-title,
+  .peer-line {
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
+  .picker-field {
+    width: 100%;
+    flex-basis: 100%;
+    margin-top: 13px;
+  }
+
+  .county-results {
+    right: auto;
+    left: 0;
+    width: 100%;
+  }
+}

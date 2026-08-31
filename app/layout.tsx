@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
-import { DM_Sans, Lora } from 'next/font/google';
+import { Libre_Franklin, Source_Serif_4 } from 'next/font/google';
 import './globals.css';
 
-const dmSans = DM_Sans({ variable: '--font-dm-sans', subsets: ['latin'] });
-const lora = Lora({ variable: '--font-lora', subsets: ['latin'] });
+const dmSans = Libre_Franklin({ variable: '--font-dm-sans', subsets: ['latin'] });
+const lora = Source_Serif_4({ variable: '--font-lora', subsets: ['latin'] });
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://adapt-policy-intelligence.amitonquest.chatgpt.site'),
