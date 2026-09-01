@@ -311,6 +311,114 @@ html[data-theme='dark'] .metric-card:hover {
   }
 }
 
+.demo-profile,
+.ai-impact {
+  max-width: 820px;
+  margin: 14px auto 18px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--white);
+  box-shadow: 0 5px 20px rgba(9, 30, 63, 0.05);
+}
+
+.demo-profile > header,
+.ai-impact-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.demo-profile header small,
+.ai-impact-head small,
+.ai-impact-grid article > small,
+.known-unknown small {
+  color: var(--adapt-blue);
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: .09em;
+}
+
+.demo-profile header h2,
+.ai-impact-head h2 {
+  margin: 5px 0 0;
+  font: 650 22px/1.1 var(--font-lora), serif;
+}
+
+.demo-profile header > span,
+.ai-impact-head > span {
+  padding: 6px 8px;
+  border: 1px solid #c7d5e4;
+  border-radius: 3px;
+  color: var(--muted);
+  font-size: 8px;
+  font-weight: 750;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.profile-grid article {
+  min-width: 0;
+  padding: 16px 18px;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.profile-grid article:nth-child(3n) { border-right: 0; }
+.profile-grid article:nth-child(n+4) { border-bottom: 0; }
+.profile-grid small { color: var(--muted); font-size: 7px; font-weight: 800; letter-spacing: .07em; }
+.profile-grid strong { display: block; margin: 7px 0 5px; color: var(--adapt-navy); font-size: 17px; }
+.profile-grid strong i { color: var(--adapt-blue); font-size: 11px; font-style: normal; font-weight: 650; }
+.profile-grid p { margin: 0; color: var(--muted); font-size: 8px; line-height: 1.55; }
+
+.ai-impact { border-color: #b9c9d9; }
+.ai-impact-head { background: linear-gradient(135deg, #091e3f, #183d68); color: white; }
+.ai-impact-head small { color: var(--adapt-gold); }
+.ai-impact-head p { margin: 5px 0 0; color: #c8d4e2; font-size: 9px; }
+.ai-impact-head > span { border-color: #6d7e95; color: #fff; }
+
+.ai-impact-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-bottom: 1px solid var(--line);
+}
+
+.ai-impact-grid article { position: relative; padding: 20px; border-right: 1px solid var(--line); }
+.ai-impact-grid article:last-child { border-right: 0; }
+.ai-impact-grid article > span { position: absolute; top: 14px; right: 16px; color: #d9e2ec; font: 700 24px var(--font-lora), serif; }
+.ai-impact-grid h3 { min-height: 38px; margin: 9px 0 8px; font: 650 16px/1.18 var(--font-lora), serif; }
+.ai-impact-grid p, .ai-impact-grid li { color: var(--muted); font-size: 8px; line-height: 1.55; }
+.ai-impact-grid ul { margin: 0; padding-left: 15px; }
+
+.known-unknown { display: grid; grid-template-columns: 1fr 1fr; }
+.known-unknown > div { padding: 18px 20px; border-right: 1px solid var(--line); }
+.known-unknown > div:last-child { border-right: 0; }
+.known-unknown strong { display: block; margin: 6px 0; font: 650 15px var(--font-lora), serif; }
+.known-unknown p { margin: 0; color: var(--muted); font-size: 8px; line-height: 1.6; }
+.ai-impact footer { display: flex; gap: 14px; padding: 14px 20px; background: #eef3f8; }
+.ai-impact footer strong { flex: 0 0 auto; color: var(--adapt-navy); font-size: 9px; }
+.ai-impact footer p { margin: 0; color: #53657c; font-size: 8px; line-height: 1.5; }
+
+html[data-theme='dark'] .demo-profile,
+html[data-theme='dark'] .ai-impact { background: #0f2038; }
+html[data-theme='dark'] .profile-grid strong { color: #f2f5f9; }
+html[data-theme='dark'] .ai-impact footer { background: #152943; }
+html[data-theme='dark'] .ai-impact footer strong { color: #dbe8f5; }
+html[data-theme='dark'] .ai-impact-grid article > span { color: #29405d; }
+
+@media (max-width: 760px) {
+  .profile-grid, .ai-impact-grid, .known-unknown { grid-template-columns: 1fr; }
+  .profile-grid article, .ai-impact-grid article, .known-unknown > div { border-right: 0; border-bottom: 1px solid var(--line); }
+  .profile-grid article:nth-child(n+4) { border-bottom: 1px solid var(--line); }
+  .profile-grid article:last-child, .ai-impact-grid article:last-child, .known-unknown > div:last-child { border-bottom: 0; }
+  .demo-profile > header, .ai-impact-head { flex-direction: column; }
+}
+
 .ai-chat {
   max-width: 820px;
   margin: 14px auto 18px;

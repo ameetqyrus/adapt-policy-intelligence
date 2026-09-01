@@ -9,23 +9,41 @@ type County = { countyid: number; name: string; state: string; populationGroup: 
 type Source = { id: number; jurisdiction: string; title: string; detail: string; url: string; kind: string; countyids?: number[] };
 type Theme = 'light' | 'dark';
 type ChatMessage = { role: 'user' | 'assistant'; content: string; citations?: Array<{ title: string; url: string }> };
+type CountyProfile = { population: number; populationChange: number; broadband: number; bachelors: number; laborForce: number; commute: number; householdIncome: number; poverty: number; establishments: number; employment: number; sourceId: number };
 
-const DEFAULT_COUNTY = 42003;
+const DEFAULT_COUNTY = 39149;
 const initialCounties: County[] = [
-  { countyid: 42003, name: 'Allegheny County, PA', state: 'PA', populationGroup: '2nd most populated quartile (by people)', workers: 620629, metrics: { potential: { value: .13, rank: 19, total: 107 }, star_median2022: { value: 48014.2912, rank: 64, total: 110 }, star_emp_rate_2022: { value: 94.0055, rank: 77, total: 110 }, educ_pct_total_stloc2022: { value: .4396, rank: 62, total: 107 }, ppupil_deflate_2022: { value: 27771.2598, rank: 10, total: 110 }, pct_pred_emp_gain: { value: .2825, rank: 88, total: 107 }, pct_pred_emp_loss: { value: 2.9602, rank: 47, total: 106 } }, peer: { countyid: 49035, name: 'Salt Lake County', state: 'UT', matchTier: 'rucc_econtype_lowed', rucc: 1, economicType: 'Nonspecialized', similarWorkforce: true } },
-  { countyid: 49035, name: 'Salt Lake County, UT', state: 'UT', populationGroup: '2nd most populated quartile (by people)', workers: 622248, metrics: { potential: { value: .0677, rank: 74, total: 107 }, star_median2022: { value: 50189.7944, rank: 54, total: 110 }, star_emp_rate_2022: { value: 96.9298, rank: 3, total: 110 }, educ_pct_total_stloc2022: { value: .3108, rank: 96, total: 107 }, ppupil_deflate_2022: { value: 13082.624, rank: 104, total: 110 }, pct_pred_emp_gain: { value: .5565, rank: 27, total: 107 }, pct_pred_emp_loss: { value: 4.4303, rank: 84, total: 106 } }, peer: { countyid: 42003, name: 'Allegheny County', state: 'PA', matchTier: 'rucc_econtype_lowed', rucc: 1, economicType: 'Nonspecialized', similarWorkforce: true } },
+  { countyid: 39149, name: 'Shelby County, OH', state: 'OH', populationGroup: '4th most populated quartile (by people)', workers: 22792, metrics: { potential: { value: .0149, rank: 2454, total: 2666 }, star_median2022: { value: 49704.2212, rank: 428, total: 2671 }, star_emp_rate_2022: { value: 97.9734, rank: 144, total: 2671 }, educ_pct_total_stloc2022: { value: .4628, rank: 1547, total: 2670 }, ppupil_deflate_2022: { value: 18577.7246 }, pct_pred_emp_gain: { value: .1767 }, pct_pred_emp_loss: { value: 3.5875 } }, peer: { countyid: 39011, name: 'Auglaize County', state: 'OH', matchTier: 'rucc_econtype_lowed', rucc: 4, economicType: 'Manufacturing', similarWorkforce: true } },
+  { countyid: 39011, name: 'Auglaize County, OH', state: 'OH', populationGroup: '4th most populated quartile (by people)', workers: 22571, metrics: { potential: { value: .0374 }, star_median2022: { value: 50967.7255 }, star_emp_rate_2022: { value: 97.54 }, educ_pct_total_stloc2022: { value: .3983 }, ppupil_deflate_2022: { value: 20923.8379 }, pct_pred_emp_gain: { value: -1.3758 }, pct_pred_emp_loss: { value: 3.306 } }, peer: { countyid: 39149, name: 'Shelby County', state: 'OH', matchTier: 'rucc_econtype_lowed', rucc: 4, economicType: 'Manufacturing', similarWorkforce: true } },
 ];
 
 const sources: Source[] = [
   { id: 1, jurisdiction: 'ADAPT', title: 'ADAPT county model', detail: 'County metrics, population-group rankings and peer matching · data through 2022', kind: 'Model evidence', url: 'https://github.com/cgsp-georgetown/adapt-viz' },
-  { id: 2, jurisdiction: 'Allegheny County', title: 'All In Allegheny Action Plan', detail: 'Education, workforce, youth and equitable economic-development priorities', kind: 'Official plan', url: 'https://www.alleghenycounty.us/Government/County-Executive/All-In-Allegheny-Action-Plan', countyids: [42003] },
-  { id: 3, jurisdiction: 'Allegheny County', title: 'Allegheny Forward', detail: 'Countywide comprehensive planning for investment, infrastructure and growth', kind: 'Official plan', url: 'https://www.alleghenycounty.us/Projects-and-Initiatives/Economic-Development/Comprehensive-Plan', countyids: [42003] },
-  { id: 4, jurisdiction: 'Salt Lake County', title: 'Regional Economic Development', detail: 'Business development, workforce development and entrepreneurship', kind: 'Official programme', url: 'https://www.saltlakecounty.gov/regional-development/', countyids: [49035] },
-  { id: 5, jurisdiction: 'Salt Lake County', title: 'WISE workforce programme', detail: 'Workforce training and wraparound support for lower-income residents', kind: 'Official performance report', url: 'https://www.saltlakecounty.gov/globalassets/1-site-files/arpa/recovery-plan/2025--slco-arpa-slfrf-recovery-plan-performance-report-final.pdf', countyids: [49035] },
-  { id: 6, jurisdiction: 'Salt Lake County', title: 'A New Perspective for Prosperity', detail: 'Peer benchmarking and target-industry research for long-term prosperity', kind: 'Official research', url: 'https://www.saltlakecounty.gov/regional-development/economic-development/research/', countyids: [49035] },
+  { id: 2, jurisdiction: 'Shelby County', title: 'U.S. Census QuickFacts', detail: 'Population, income, education, broadband, business and workforce indicators', kind: 'Official statistics', url: 'https://www.census.gov/quickfacts/fact/table/shelbycountyohio/PST045225', countyids: [39149] },
+  { id: 3, jurisdiction: 'Auglaize County', title: 'U.S. Census QuickFacts', detail: 'Population, income, education, broadband, business and workforce indicators', kind: 'Official statistics', url: 'https://www.census.gov/quickfacts/fact/table/auglaizecountyohio/PST045225', countyids: [39011] },
+  { id: 4, jurisdiction: 'Ohio', title: 'OhioLMI County Economic Profiles', detail: 'County industry, employment, unemployment and wage context', kind: 'State labor data', url: 'https://ohiolmi.com/Home/Dashboards/CountyEconomicProfiles', countyids: [39149, 39011] },
+  { id: 5, jurisdiction: 'United States', title: 'BEA GDP by County', detail: 'Official county GDP and industry contribution data', kind: 'Official statistics', url: 'https://www.bea.gov/data/gdp/gdp-county', countyids: [39149, 39011] },
+  { id: 6, jurisdiction: 'United States', title: 'BLS Quarterly Census of Employment and Wages', detail: 'Establishment, employment and wage data by county and industry', kind: 'Official statistics', url: 'https://www.bls.gov/cew/data.htm', countyids: [39149, 39011] },
+  { id: 7, jurisdiction: 'Global', title: 'Future of Jobs Report 2025', detail: 'Employer scenarios for job creation, displacement and skills through 2030', kind: 'Scenario evidence', url: 'https://www.weforum.org/publications/the-future-of-jobs-report-2025/in-full/2-jobs-outlook/', countyids: [39149, 39011] },
+  { id: 8, jurisdiction: 'Global', title: 'Generative AI and Jobs: 2025 Update', detail: 'Task-level exposure gradients and the distinction between transformation and redundancy', kind: 'Research evidence', url: 'https://www.ilo.org/publications/generative-ai-and-jobs-2025-update', countyids: [39149, 39011] },
+  { id: 9, jurisdiction: 'United States', title: 'Generative AI and the future of work in America', detail: 'Occupation transitions, workforce mobility and adoption scenarios', kind: 'Research evidence', url: 'https://www.mckinsey.com/mgi/our-research/generative-ai-and-the-future-of-work-in-america', countyids: [39149, 39011] },
+  { id: 10, jurisdiction: 'Global', title: 'Gen-AI: Artificial Intelligence and the Future of Work', detail: 'Exposure, complementarity, inequality and adaptation uncertainty', kind: 'Research evidence', url: 'https://www.elibrary.imf.org/view/journals/006/2024/001/article-A001-en.xml', countyids: [39149, 39011] },
+  { id: 11, jurisdiction: 'United States', title: 'How will AI affect the US labor market?', detail: 'National task-automation estimates and transition scenarios', kind: 'Research evidence', url: 'https://www.goldmansachs.com/insights/articles/how-will-ai-affect-the-us-labor-market', countyids: [39149, 39011] },
+  { id: 12, jurisdiction: 'Global', title: 'OECD Employment Outlook 2026', detail: 'Place-sensitive responses to technology and labor-market shocks', kind: 'Policy evidence', url: 'https://www.oecd.org/en/publications/oecd-employment-outlook-2026_7e710f54-en.html', countyids: [39149, 39011] },
+  { id: 13, jurisdiction: 'Global', title: 'The Impact of Robots on Employment and Jobs', detail: 'Research overview on industrial robotics and employment', kind: 'Research evidence', url: 'https://ifr.org/papers/the-impact-of-robots-on-employment-and-jobs', countyids: [39149, 39011] },
+  { id: 14, jurisdiction: 'Global', title: 'Anthropic Economic Index', detail: 'Survey evidence on worker experience and expectations as aggregate data lag adoption', kind: 'Emerging evidence', url: 'https://www.anthropic.com/research/economic-index-survey-announcement', countyids: [39149, 39011] },
+  { id: 15, jurisdiction: 'Allegheny County', title: 'All In Allegheny Action Plan', detail: 'Education, workforce, youth and equitable economic-development priorities', kind: 'Official plan', url: 'https://www.alleghenycounty.us/Government/County-Executive/All-In-Allegheny-Action-Plan', countyids: [42003] },
+  { id: 16, jurisdiction: 'Allegheny County', title: 'Allegheny Forward', detail: 'Countywide comprehensive planning for investment, infrastructure and growth', kind: 'Official plan', url: 'https://www.alleghenycounty.us/Projects-and-Initiatives/Economic-Development/Comprehensive-Plan', countyids: [42003] },
+  { id: 17, jurisdiction: 'Salt Lake County', title: 'Regional Economic Development', detail: 'Business development, workforce development and entrepreneurship', kind: 'Official programme', url: 'https://www.saltlakecounty.gov/regional-development/', countyids: [49035] },
+  { id: 18, jurisdiction: 'Salt Lake County', title: 'WISE workforce programme', detail: 'Workforce training and wraparound support for lower-income residents', kind: 'Official performance report', url: 'https://www.saltlakecounty.gov/globalassets/1-site-files/arpa/recovery-plan/2025--slco-arpa-slfrf-recovery-plan-performance-report-final.pdf', countyids: [49035] },
+  { id: 19, jurisdiction: 'Salt Lake County', title: 'A New Perspective for Prosperity', detail: 'Peer benchmarking and target-industry research for long-term prosperity', kind: 'Official research', url: 'https://www.saltlakecounty.gov/regional-development/economic-development/research/', countyids: [49035] },
 ];
 
-const questions = ['Why is this peer performing differently?', 'Compare education and workforce investment', 'What practices should this county investigate?', 'What should we avoid copying?'];
+const questions = ['Why is this peer performing differently?', 'Compare education and workforce investment', 'What practices should this county investigate?', 'What should we avoid copying?', 'Economic prosperity', 'Employment and workforce', 'Population and talent attraction', 'What could AI automate in this county?', 'What is the potential impact of AI and humanoid robots?', 'What could the workforce look like in 2030?'];
+const countyProfiles: Record<number, CountyProfile> = {
+  39149: { population: 48065, populationChange: -.4, broadband: 92.5, bachelors: 21.4, laborForce: 65.5, commute: 19.0, householdIncome: 73978, poverty: 8.9, establishments: 989, employment: 24487, sourceId: 2 },
+  39011: { population: 45909, populationChange: -1.1, broadband: 87.8, bachelors: 21.6, laborForce: 66.3, commute: 18.8, householdIncome: 78660, poverty: 7.0, establishments: 992, employment: 23217, sourceId: 3 },
+};
 const metricOrder = ['potential', 'star_median2022', 'star_emp_rate_2022', 'educ_pct_total_stloc2022', 'ppupil_deflate_2022'];
 const metricLabels: Record<string, string> = {
   potential: 'American Dream potential',
@@ -134,6 +152,7 @@ function CountyPicker({ id, label, counties, value, onChange }: { id: string; la
 
 function buildAnswer(home: County, peer: County, prompt: string) {
   const lower = prompt.toLowerCase();
+  const isAi = /automation|automate|artificial intelligence|\bai\b|robot|humanoid|2030|future of work/.test(lower);
   const homeWage = home.metrics.star_median2022?.value;
   const peerWage = peer.metrics.star_median2022?.value;
   const homeEmployment = home.metrics.star_emp_rate_2022?.value;
@@ -146,6 +165,16 @@ function buildAnswer(home: County, peer: County, prompt: string) {
   const isPractice = /practice|policy|programme|program|investigate|copy|learn/.test(lower);
   const employmentGap = (peerEmployment ?? 0) - (homeEmployment ?? 0);
   const wageGap = (peerWage ?? 0) - (homeWage ?? 0);
+  if (isAi) return {
+    title: `The local AI impact is uncertain; ${compactName(home.name)} should prepare for task transformation and worker transitions.`,
+    summary: `${compactName(home.name)} and ${compactName(peer.name)} are similar-workforce manufacturing counties. Public research can identify plausible exposure pathways, but it cannot yet produce a defensible county job-loss forecast.`,
+    findings: [
+      'Routine documentation, scheduling, inventory support and some quality-control tasks are practical candidates for investigation—not claims that whole occupations will disappear.',
+      'ILO task-level evidence indicates transformation is generally more likely than wholesale redundancy, while exposure and the capacity to adapt differ across workers and places.',
+      'Global 2030 scenarios show simultaneous job creation and displacement. Those figures are directional context, not a forecast for either Ohio county.',
+    ],
+    recommendation: `Build a local occupation-and-task inventory using OhioLMI and BLS QCEW, validate it with employers and educators, then track adoption, training, placement and retention quarterly.`,
+  };
   const emphasis = isAvoid
     ? 'Treat programmes as candidates for investigation, not recipes. Different state powers, tax structures and delivery partners can make a policy non-transferable.'
     : isEmployment
@@ -187,6 +216,19 @@ function buildAnswer(home: County, peer: County, prompt: string) {
     ],
     recommendation,
   };
+}
+
+function AiImpactSection({ home, peer }: { home: County; peer: County }) {
+  return <section className="ai-impact" id="ai-impact">
+    <header className="ai-impact-head"><div><small>AI IMPACT SCENARIO LENS</small><h2>AI, automation & humanoid robots</h2><p>How to prepare when county-specific adoption and impact data do not yet exist.</p></div><span>Not a county forecast</span></header>
+    <div className="ai-impact-grid">
+      <article><span>01</span><small>TASKS TO INVESTIGATE</small><h3>Start with work, not job titles</h3><ul><li>Routine documentation and reporting</li><li>Scheduling, inventory and maintenance support</li><li>Visual inspection and quality control</li><li>Material handling, picking and packing</li></ul></article>
+      <article><span>02</span><small>WHAT MAY CHANGE BY 2030</small><h3>Transformation and displacement can coexist</h3><p>ILO evidence points more often to transformed work than whole-job redundancy. WEF scenarios show both growing and declining roles, especially across technology and clerical work. <SourceLink id={8} /> <SourceLink id={7} /></p></article>
+      <article><span>03</span><small>HOW TO PREPARE</small><h3>Turn uncertainty into a local learning system</h3><ul><li>Map occupations to tasks with OhioLMI and QCEW <SourceLink id={4} /> <SourceLink id={6} /></li><li>Interview employers about actual adoption</li><li>Offer short-cycle, employer-validated training</li><li>Monitor transitions, placement and retention</li></ul></article>
+    </div>
+    <div className="known-unknown"><div><small>WHAT WE KNOW</small><strong>A comparable manufacturing pair</strong><p>{compactName(home.name)} and {compactName(peer.name)} are mutual ADAPT peers with similar workforce sizes. Census indicators provide a starting view of skills, participation and digital access. <SourceLink id={1} /> <SourceLink id={2} /> <SourceLink id={3} /></p></div><div><small>WHAT WE DO NOT KNOW</small><strong>The timing and net local effect</strong><p>Firm adoption, task exposure, investment timing and worker transitions are not measured county forecasts. IMF, OECD and Anthropic all reinforce the need to monitor adaptation rather than overstate certainty. <SourceLink id={10} /> <SourceLink id={12} /> <SourceLink id={14} /></p></div></div>
+    <footer><strong>Planning implication</strong><p>We cannot promise whether AI will create or remove more local jobs. We can identify exposed tasks, build transition capacity and update the strategy as evidence arrives.</p></footer>
+  </section>;
 }
 
 function AiChat({ context }: { context: Record<string, unknown> }) {
@@ -326,10 +368,16 @@ export default function Home() {
 
   const home = countyById.get(homeId) ?? countyById.get(DEFAULT_COUNTY)!;
   const computedPeer = home.peer ? countyById.get(home.peer.countyid) : undefined;
-  const peer = (peerOverride ? countyById.get(peerOverride) : computedPeer) ?? countyById.get(49035)!;
+  const peer = (peerOverride ? countyById.get(peerOverride) : computedPeer) ?? countyById.get(39011)!;
   const answer = useMemo(() => asked ? buildAnswer(home, peer, asked) : null, [home, peer, asked]);
-  const pairHasCuratedEvidence = new Set([home.countyid, peer.countyid]).size === 2
+  const pairIsShelbyAuglaize = new Set([home.countyid, peer.countyid]).size === 2
+    && [39149, 39011].every((countyid) => countyid === home.countyid || countyid === peer.countyid);
+  const pairIsLegacyDemo = new Set([home.countyid, peer.countyid]).size === 2
     && [42003, 49035].every((countyid) => countyid === home.countyid || countyid === peer.countyid);
+  const pairHasCuratedEvidence = pairIsShelbyAuglaize || pairIsLegacyDemo;
+  const answerIsAi = Boolean(asked && /automation|automate|artificial intelligence|\bai\b|robot|humanoid|2030|future of work/i.test(asked));
+  const homeProfile = countyProfiles[home.countyid];
+  const peerProfile = countyProfiles[peer.countyid];
   const displayedSources = sources.filter((source) => !source.countyids || source.countyids.some((countyid) => countyid === home.countyid || countyid === peer.countyid));
   const aiContext = answer ? {
     home: { countyid: home.countyid, name: home.name, populationGroup: home.populationGroup, workers: home.workers },
@@ -394,8 +442,8 @@ export default function Home() {
     <aside className="sidebar">
       <div className="brand"><span>A</span><div><strong>AdapT</strong><small>County intelligence</small></div></div>
       <button className="new-question" type="button" onClick={startNewQuestion}>＋ New question</button>
-      <nav><p>Workspace</p><a className="active" href="#comparison">⌁ County comparison</a><a href="#evidence">▤ Evidence <span>{displayedSources.length}</span></a><a href="#method">◎ Method</a></nav>
-      <div className="sidebar-note"><strong>ADAPT-connected</strong><p>Quantitative context comes from the county model. Policy claims stay linked to their original source.</p></div>
+      <nav><p>Workspace</p><a className="active" href="#comparison">⌁ County comparison</a><a href="#ai-impact">◇ AI impact</a><a href="#evidence">▤ Evidence <span>{displayedSources.length}</span></a><a href="#method">◎ Method</a></nav>
+      <div className="sidebar-note"><strong>ADAPT-CONNECTED</strong><p>Quantitative context comes from the county model. Policy and scenario claims stay linked to their original source.</p></div>
     </aside>
 
     <section className="workspace" id="comparison">
@@ -413,16 +461,24 @@ export default function Home() {
             const peerValue = peer.metrics[key]?.value ?? null;
             return <div className="metric-card" key={key}><small>{metricLabels[key]}</small><div className="metric-number"><strong>{formatMetric(key, homeValue)}</strong><span>vs {formatMetric(key, peerValue)}</span></div><div className="micro-chart" aria-label={`${metricLabels[key]} comparison`}><div><i style={{ width: `${metricWidth(homeValue, peerValue)}%` }} /><em>{compactName(home.name)}</em></div><div><i style={{ width: `${metricWidth(peerValue, homeValue)}%` }} /><em>{compactName(peer.name)}</em></div></div><p>{home.metrics[key]?.rank ? `Rank ${home.metrics[key].rank}/${home.metrics[key].total} in population group` : 'Comparable county measure'}</p></div>;
           })}</div>
+          {homeProfile && peerProfile && <section className="demo-profile"><header><div><small>EXPANDED COUNTY PROFILE</small><h2>Six lenses for the county conversation</h2></div><span>Census QuickFacts · mixed reference periods</span></header><div className="profile-grid">
+            <article><small>ECONOMIC PROSPERITY</small><strong>${homeProfile.householdIncome.toLocaleString()} <i>vs ${peerProfile.householdIncome.toLocaleString()}</i></strong><p>Median household income; poverty {homeProfile.poverty}% vs {peerProfile.poverty}%. <SourceLink id={homeProfile.sourceId} /> <SourceLink id={peerProfile.sourceId} /></p></article>
+            <article><small>EMPLOYMENT & WORKFORCE</small><strong>{homeProfile.laborForce}% <i>vs {peerProfile.laborForce}%</i></strong><p>Civilian labor-force participation; employer employment {homeProfile.employment.toLocaleString()} vs {peerProfile.employment.toLocaleString()}. <SourceLink id={homeProfile.sourceId} /> <SourceLink id={peerProfile.sourceId} /></p></article>
+            <article><small>EDUCATION & HUMAN CAPITAL</small><strong>{homeProfile.bachelors}% <i>vs {peerProfile.bachelors}%</i></strong><p>Bachelor’s degree or higher; ADAPT education-spending context appears above. <SourceLink id={1} /> <SourceLink id={homeProfile.sourceId} /> <SourceLink id={peerProfile.sourceId} /></p></article>
+            <article><small>POPULATION & TALENT</small><strong>{homeProfile.population.toLocaleString()} <i>vs {peerProfile.population.toLocaleString()}</i></strong><p>2025 population estimates; change since 2020 base {homeProfile.populationChange}% vs {peerProfile.populationChange}%. <SourceLink id={homeProfile.sourceId} /> <SourceLink id={peerProfile.sourceId} /></p></article>
+            <article><small>BUSINESS BASE</small><strong>{homeProfile.establishments.toLocaleString()} <i>vs {peerProfile.establishments.toLocaleString()}</i></strong><p>Employer establishments. Use OhioLMI, BEA and QCEW to investigate industry mix. <SourceLink id={4} /> <SourceLink id={5} /> <SourceLink id={6} /></p></article>
+            <article><small>INFRASTRUCTURE & QUALITY OF LIFE</small><strong>{homeProfile.broadband}% <i>vs {peerProfile.broadband}%</i></strong><p>Broadband subscriptions; mean commute {homeProfile.commute} vs {peerProfile.commute} minutes. <SourceLink id={homeProfile.sourceId} /> <SourceLink id={peerProfile.sourceId} /></p></article>
+          </div></section>}
           {asked ? <><div className="question"><span>AD</span><div><small>YOUR QUESTION</small><p>{asked}</p></div></div>
           <article className="answer-card" aria-live="polite" ref={answerRef} tabIndex={-1} key={`${home.countyid}-${peer.countyid}-${asked}-${responseVersion}`}>
             <div className="answer-head"><span>A</span><div><small>ADAPT-GROUNDED ANALYSIS</small><p>Model facts + official county evidence</p></div></div>
             <div className="answer-context">Updated for {compactName(home.name)} ↔ {compactName(peer.name)}</div>
             <div className="confidence">Evidence boundary active · comparison, not causal attribution</div>
-            <h2>{answer!.title}</h2><p>{answer!.summary} <SourceLink id={1} /></p>
-            <h3>What the comparison shows</h3><ul>{answer!.findings.map((finding) => <li key={finding}>{finding} <SourceLink id={1} /></li>)}</ul>
-            {pairHasCuratedEvidence ? <div className="policy-grid"><div><small>ALLEGHENY</small><strong>Current direction</strong><p>All In Allegheny connects education, youth investment, workforce development and equitable growth. <SourceLink id={2} /> The county is also developing a comprehensive investment framework. <SourceLink id={3} /></p></div><div><small>SALT LAKE</small><strong>Practices to investigate</strong><p>Salt Lake County combines regional economic-development research with workforce programmes that track training completion, hiring and retention. <SourceLink id={4} /> <SourceLink id={5} /> <SourceLink id={6} /></p></div></div> : <div className="policy-grid evidence-gap"><div><small>{compactName(home.name).toUpperCase()}</small><strong>Official evidence needed</strong><p>The ADAPT comparison is available, but an approved county source catalog has not yet been connected for this jurisdiction.</p></div><div><small>{compactName(peer.name).toUpperCase()}</small><strong>No policy claim generated</strong><p>Add official plans, budgets, programme evaluations and legislation before drawing a substantive conclusion.</p></div></div>}
+            <h2>{answer!.title}</h2><p>{answer!.summary} <SourceLink id={1} /> {answerIsAi && <><SourceLink id={8} /> <SourceLink id={10} /></>}</p>
+            <h3>What the comparison shows</h3><ul>{answer!.findings.map((finding, index) => <li key={finding}>{finding} {answerIsAi ? <SourceLink id={[6, 8, 7][index]} /> : <SourceLink id={1} />}</li>)}</ul>
+            {pairIsShelbyAuglaize ? <div className="policy-grid"><div><small>SHELBY COUNTY</small><strong>Manufacturing county context</strong><p>ADAPT identifies a similar workforce and manufacturing economic structure. Census measures add population, skills, participation and business-base signals. <SourceLink id={1} /> <SourceLink id={2} /></p></div><div><small>AUGLAIZE COUNTY</small><strong>Mutual computed peer</strong><p>Auglaize independently selects Shelby as its ADAPT peer. OhioLMI, BEA and QCEW provide the next layer for industry and occupation investigation. <SourceLink id={1} /> <SourceLink id={3} /> <SourceLink id={4} /></p></div></div> : pairIsLegacyDemo ? <div className="policy-grid"><div><small>ALLEGHENY</small><strong>Current direction</strong><p>All In Allegheny connects education, youth investment, workforce development and equitable growth. <SourceLink id={15} /> The county is also developing a comprehensive investment framework. <SourceLink id={16} /></p></div><div><small>SALT LAKE</small><strong>Practices to investigate</strong><p>Salt Lake County combines regional economic-development research with workforce programmes that track training completion, hiring and retention. <SourceLink id={17} /> <SourceLink id={18} /> <SourceLink id={19} /></p></div></div> : <div className="policy-grid evidence-gap"><div><small>{compactName(home.name).toUpperCase()}</small><strong>Official evidence needed</strong><p>The ADAPT comparison is available, but an approved county source catalog has not yet been connected for this jurisdiction.</p></div><div><small>{compactName(peer.name).toUpperCase()}</small><strong>No policy claim generated</strong><p>Add official plans, budgets, programme evaluations and legislation before drawing a substantive conclusion.</p></div></div>}
             <div className="recommendation"><strong>Recommended next step</strong><p>{answer!.recommendation}</p></div>
-          </article>{aiContext && <AiChat key={`${home.countyid}-${peer.countyid}-${asked}`} context={aiContext} />}</> : <div className="empty-answer" aria-live="polite"><strong>Start a new county question</strong><p>Choose a prompt below or write your own. Press Enter to submit; Shift + Enter adds a new line.</p></div>}
+          </article>{pairIsShelbyAuglaize && <AiImpactSection home={home} peer={peer} />}{aiContext && <AiChat key={`${home.countyid}-${peer.countyid}-${asked}`} context={aiContext} />}</> : <div className="empty-answer" aria-live="polite"><strong>Start a new county question</strong><p>Choose a prompt below or write your own. Press Enter to submit; Shift + Enter adds a new line.</p></div>}
           <div className="suggestions">{questions.map((question) => <button className={selectedPreset === question ? 'selected' : ''} type="button" aria-pressed={selectedPreset === question} key={question} onClick={() => choosePreset(question)}>{question} →</button>)}</div>
           {selectedPreset && <p className="preset-hint" role="status">Preset selected — press Send to update the analysis.</p>}
           <form className="composer" onSubmit={ask}><textarea ref={composerRef} aria-label="Ask a county policy question" rows={2} value={prompt} onKeyDown={handleComposerKeyDown} onChange={(event) => { setPrompt(event.target.value); setSelectedPreset(null); }} placeholder={`Ask about ${compactName(home.name)} and ${compactName(peer.name)}…`} /><button type="submit" aria-label="Send question" disabled={!prompt.trim()}>↑</button></form>

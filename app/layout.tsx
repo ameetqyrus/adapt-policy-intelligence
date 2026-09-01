@@ -8,16 +8,16 @@ const lora = Source_Serif_4({ variable: '--font-lora', subsets: ['latin'] });
 export const metadata: Metadata = {
   metadataBase: new URL('https://adapt-policy-intelligence.amitonquest.chatgpt.site'),
   title: 'AdapT — Policy Intelligence',
-  description: 'ADAPT-grounded peer-county comparisons with official policy evidence.',
+  description: 'ADAPT-grounded peer-county comparison and evidence-bounded AI impact scenario planning.',
   openGraph: {
     title: 'AdapT — Policy Intelligence',
-    description: 'Peer-county policy intelligence, grounded in ADAPT data and official evidence.',
+    description: 'County comparison and AI impact scenario planning, grounded in ADAPT and official evidence.',
     images: [{ url: '/og.png', width: 1200, height: 630, alt: 'AdapT — Policy intelligence, grounded in evidence' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'AdapT — Policy Intelligence',
-    description: 'Peer-county policy intelligence, grounded in ADAPT data and official evidence.',
+    description: 'County comparison and AI impact scenario planning, grounded in ADAPT and official evidence.',
     images: ['/og.png'],
   },
 };
