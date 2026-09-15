@@ -1,7 +1,7 @@
 import { sites } from '@openai/sites-vite-plugin';
 import tailwindcss from '@tailwindcss/postcss';
 import vinext from 'vinext';
-import { defineConfig } from 'vite';
+import { defineConfig,loadEnv } from 'vite';
 import hostingConfig from './.openai/hosting.json';
 
 const SITE_CREATOR_PLACEHOLDER_DATABASE_ID =
@@ -34,7 +34,10 @@ const localBindingConfig = {
     : [],
 };
 
-export default defineConfig(async () => {
+export default defineConfig(async ({command}) => {
+  // Read approved local secrets only for the local development process.
+  // Never put these values into the production build configuration.
+  const devSecrets=command==='serve'?loadEnv('development',process.cwd(),''):{};
   // Keep Wrangler and Miniflare state project-local. These are non-secret tool
   // settings; application environment belongs in ignored `.env*` files.
   process.env.WRANGLER_WRITE_LOGS ??= 'false';
@@ -54,7 +57,7 @@ export default defineConfig(async () => {
       sites(),
       cloudflare({
         viteEnvironment: { name: 'rsc', childEnvironments: ['ssr'] },
-        config: localBindingConfig,
+        config: {...localBindingConfig,...(command==='serve'?{vars:{OPENAI_API_KEY:devSecrets.OPENAI_API_KEY||'',TESTER_EMAILS:'seedy@sites.test',ADMIN_EMAILS:'seedy@sites.test'}}:{})},
       }),
     ],
   };
