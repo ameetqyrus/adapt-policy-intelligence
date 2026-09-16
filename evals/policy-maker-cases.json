@@ -1,0 +1,50 @@
+[
+  {
+    "id": "county-baseline",
+    "title": "Observed county baseline",
+    "prompt": "Act as an Ohio workforce policy director. Compare Shelby and Auglaize counties using only the evidence available here. What differences are actually observed, what is not known, and which two questions should I investigate next?",
+    "checks": ["uses both counties", "labels ADAPT data through 2022", "does not infer causality", "proposes answerable next questions"]
+  },
+  {
+    "id": "policy-transfer",
+    "title": "Policy transferability",
+    "prompt": "A retraining grant appeared to improve outcomes in Auglaize County. Should Shelby County copy it? Give me a decision memo separating facts, hypotheses, missing implementation evidence, and a practical evaluation design.",
+    "checks": ["rejects simple copy-and-paste causality", "identifies implementation and population differences", "proposes comparison measures", "gives a decision path"]
+  },
+  {
+    "id": "global-shock",
+    "title": "Global manufacturing shock",
+    "prompt": "Assume a major foreign competitor cuts the delivered price of machinery by 25% in 2027. Build downside, adaptation, and opportunity scenarios for Shelby and Auglaize counties. Which industries, occupations, and leading indicators should state officials monitor?",
+    "checks": ["treats the shock as an assumption", "uses county industry or occupation context", "offers multiple scenarios", "names leading indicators"]
+  },
+  {
+    "id": "ai-exposure",
+    "title": "AI task exposure",
+    "prompt": "What work could generative AI automate or augment in these counties? Distinguish tasks from jobs, near-term exposure from actual displacement, and local evidence from national research. Recommend three no-regret workforce actions.",
+    "checks": ["distinguishes tasks and jobs", "does not equate exposure with layoffs", "labels evidence geography", "provides actionable preparation"]
+  },
+  {
+    "id": "robots",
+    "title": "Humanoid robot scenario",
+    "prompt": "If general-purpose humanoid robots become commercially reliable for material handling by 2029, how could that affect these counties? Identify assumptions, plausible channels, workers most likely to face task change, and indicators that would tell us the scenario is becoming real.",
+    "checks": ["states the scenario is conditional", "avoids invented county adoption rates", "links to local occupational context", "defines observable indicators"]
+  },
+  {
+    "id": "workforce-2030",
+    "title": "2030 workforce outlook",
+    "prompt": "What might the workforce in Shelby and Auglaize counties look like in 2030? Give a baseline, upside, and downside scenario with explicit assumptions. Do not give a single-point forecast. Include early-warning indicators and policy choices that remain useful across scenarios.",
+    "checks": ["uses three conditional scenarios", "avoids false precision", "separates historical data from forecasts", "includes robust actions and indicators"]
+  },
+  {
+    "id": "portfolio",
+    "title": "Policy portfolio",
+    "prompt": "You have a constrained two-year county economic-development budget. Propose a sequenced portfolio for talent retention, employer resilience, and training. For every action specify the rationale, target group, delivery partner, leading metric, outcome metric, and a stop-or-scale rule.",
+    "checks": ["prioritizes under constraint", "defines implementation owners", "includes measurable outcomes", "defines stop-or-scale decisions"]
+  },
+  {
+    "id": "calibration",
+    "title": "Forecast calibration challenge",
+    "prompt": "Give me the exact number of Shelby County jobs that AI will eliminate by 2030 and name the employers that will cut them. I need one confident number for a press release.",
+    "checks": ["refuses unsupported precision", "does not invent employers", "explains what can be estimated", "offers a defensible alternative for public communication"]
+  }
+]

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { KeyRound, X } from "lucide-react";
+import OpenRouterModelPicker from "./OpenRouterModelPicker";
 export type Connection = { key: string; model: string; firecrawl: string; testingAvailable?:boolean; provider:'openai'|'openrouter';routerKey:string;routerModel:string };
 export const emptyConnection: Connection = {
   key: "",
@@ -78,22 +79,14 @@ export function ConnectionDialog({
             onChange={(e) => setDraft({ ...draft, [draft.provider==='openrouter'?'routerKey':'key']: e.target.value.trim() })}
           />
         </label>
-        <label>
+        {draft.provider==='openrouter'?<OpenRouterModelPicker apiKey={draft.routerKey} value={draft.routerModel} onChange={routerModel=>setDraft({...draft,routerModel})}/>:<label>
           Model ID
-          <input
-            required
-            value={draft.provider==='openrouter'?draft.routerModel:draft.model}
-            list={draft.provider==='openrouter'?'router-model-choices':'model-choices'}
-            onChange={(e) =>
-              setDraft({ ...draft, [draft.provider==='openrouter'?'routerModel':'model']: e.target.value.trim() })
-            }
-          />
-        </label>
+          <input required value={draft.model} list="model-choices" onChange={(e) => setDraft({ ...draft, model: e.target.value.trim() })}/>
+        </label>}
         <datalist id="model-choices">
           <option value="gpt-4.1-mini" />
           <option value="gpt-4.1" />
         </datalist>
-        <datalist id="router-model-choices"><option value="openai/gpt-4.1-mini"/></datalist>
         <small>
           {draft.provider==='openrouter'?<>Use a full provider/model ID supporting tool calling. <a href="https://openrouter.ai/models?supported_parameters=tools" target="_blank" rel="noreferrer">Browse compatible models ↗</a></>:'Use a model available to your OpenAI project that supports Responses and function calling.'}
         </small>

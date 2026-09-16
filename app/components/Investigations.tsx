@@ -12,6 +12,7 @@ import {
 import Markdown from "react-markdown";
 import { County, Investigation, Message } from "@/lib/types";
 import { Connection } from "./Connection";
+import policyEvalCases from "@/evals/policy-maker-cases.json";
 export async function api<T=Record<string,unknown>>(url: string, options?: RequestInit):Promise<T> {
   const r = await fetch(url, options);
   const data = await r.json() as {error?:string};
@@ -286,6 +287,21 @@ export default function Investigations({
               <small>
                 These are starting points, not the limits of what you can ask.
               </small>
+              <details className="eval-starters">
+                <summary>Policymaker evaluation prompts · {policyEvalCases.length}</summary>
+                <p>
+                  Run the same prompts across models to compare grounding,
+                  uncertainty and decision usefulness.
+                </p>
+                <div>
+                  {policyEvalCases.map((item) => (
+                    <button key={item.id} onClick={() => setDraft(item.prompt)} disabled={busy}>
+                      <span>{item.title}</span>
+                      <small>{item.prompt}</small>
+                    </button>
+                  ))}
+                </div>
+              </details>
             </div>
           ) : (
             messages.map((m) => (

@@ -21,7 +21,7 @@ export async function POST(
       model = builtIn?'gpt-4.1-mini':String(data.model || (provider==='openrouter'?'openai/gpt-4.1-mini':"gpt-4.1-mini"));
     if (!message || message.length > 6000)
       throw new HttpError(400, "Enter a question up to 6,000 characters.");
-    if (!(provider==='openrouter'?/^[a-zA-Z0-9._:-]+\/[a-zA-Z0-9._:/-]+$/:/^[a-zA-Z0-9._:-]+$/).test(model)||model.length>150)
+    if (!(provider==='openrouter'?/^[~a-zA-Z0-9._:-]+\/[a-zA-Z0-9._:/-]+$/:/^[a-zA-Z0-9._:-]+$/).test(model)||model.length>150)
       throw new HttpError(400, "Enter a valid model ID for the selected provider.");
     const ids = validCounties(data.counties);
     if (!ids.length) throw new HttpError(400, "Select at least one county.");

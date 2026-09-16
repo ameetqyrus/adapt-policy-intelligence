@@ -20,6 +20,8 @@ An optional built-in OpenAI testing connection uses the server-only `OPENAI_API_
 
 OpenAI uses the Responses API; OpenRouter uses Chat Completions with normalized tool calls. Tool reasoning metadata is preserved during an OpenRouter tool cycle but is not displayed as an answer.
 
+OpenRouter model choices are loaded from the live text-model catalog. The picker shows the full catalog and identifies which entries support the county and evidence tools required by an investigation; incompatible entries remain visible but cannot be selected. See [the policy evaluation plan](POLICY-EVAL-PLAN.md) for the policymaker prompts, scoring dimensions and before/after evidence experiment, and [the latest results](EVAL-RESULTS.md) for the verified scope and outstanding live checks.
+
 ## County data
 
 The bundled county catalog comes from `cgsp-georgetown/adapt-viz`. `scripts/import-adapt.mjs PATH_TO_UPSTREAM_DATA` generates county geometry, historical observations, and industry/occupation detail files from its CSV/GeoJSON data. County IDs are numeric FIPS; the UI formats leading zeroes when needed. Source values retain their original units. ADAPT data through 2022 are historical/modelled estimates, not current economic conditions or causal policy evaluations.

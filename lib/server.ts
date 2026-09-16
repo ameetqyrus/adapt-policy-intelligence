@@ -55,8 +55,15 @@ export const db = () => {
     );
   return bindings.DB;
 };
-export const json = (value: unknown, status = 200) =>
-  Response.json(value, { status, headers: { "Cache-Control": "no-store" } });
+export const json = (
+  value: unknown,
+  status = 200,
+  headers: Record<string, string> = {},
+) =>
+  Response.json(value, {
+    status,
+    headers: { "Cache-Control": "no-store", ...headers },
+  });
 export function fail(error: unknown) {
   if (error instanceof HttpError)
     return json({ error: error.message }, error.status);
