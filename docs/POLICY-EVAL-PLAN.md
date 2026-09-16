@@ -30,3 +30,7 @@ Website indexing is tested separately because it depends on a Firecrawl account.
 - Set `OPENROUTER_MODEL`, `ADAPT_EVAL_BASE_URL`, `ADAPT_EVAL_COOKIE`, or `ADAPT_EVAL_REPORT` to change the model, target, signed-in session or report path without putting credentials in source control.
 
 Heuristic live signals are a first pass, not an authoritative judge. The final review should read every answer using the six dimensions above and record material unsupported claims verbatim.
+
+## September 16 live run
+
+The first real run used `openai/gpt-5.6-luna` through OpenRouter. It completed all eight cases and the Riverstone before/after experiment. Results, including the failed baseline metric check and the resulting product correction, are recorded in `EVAL-RESULTS.md` and `LIVE-EVAL-REPORT.md`. The website integration remains split into a passing controlled test and a blocked live Firecrawl test so those outcomes cannot be conflated.

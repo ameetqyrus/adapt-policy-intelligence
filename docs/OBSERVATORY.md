@@ -4,7 +4,7 @@ This isolated version combines native ADAPT county exploration with free-form, s
 
 ## AI connection
 
-Open **AI connection** in the sidebar. Choose **OpenAI** or **OpenRouter**. Each has separate key and model fields; switching providers preserves both configurations. OpenRouter requires a full model identifier (for example `openai/gpt-4.1-mini`) and a model/provider supporting tool calling. OpenRouter keys are sent only to OpenRouter. There is no automatic fallback to OpenAI. The selected provider receives recent conversation history and retrieved evidence. OpenRouter also routes that data to the underlying model provider.
+Open **AI connection** in the sidebar. Choose **OpenAI** or **OpenRouter**. Each has separate key and model fields; switching providers preserves both configurations. OpenRouter requires a full model identifier (for example `openai/gpt-5.6-luna`) and a model/provider supporting tool calling. OpenRouter keys are sent only to OpenRouter. There is no automatic fallback to OpenAI. The selected provider receives recent conversation history and retrieved evidence. OpenRouter also routes that data to the underlying model provider.
 
 User-entered keys are tab-session preferences, not saved database records. They are forwarded through the server to the selected provider and are excluded from saved messages. Closing a tab normally clears its session storage; browser session restoration may retain it. Use **Clear keys** to remove all local credentials explicitly.
 
@@ -24,7 +24,7 @@ OpenRouter model choices are loaded from the live text-model catalog. The picker
 
 ## County data
 
-The bundled county catalog comes from `cgsp-georgetown/adapt-viz`. `scripts/import-adapt.mjs PATH_TO_UPSTREAM_DATA` generates county geometry, historical observations, and industry/occupation detail files from its CSV/GeoJSON data. County IDs are numeric FIPS; the UI formats leading zeroes when needed. Source values retain their original units. ADAPT data through 2022 are historical/modelled estimates, not current economic conditions or causal policy evaluations.
+The bundled county catalog comes from `cgsp-georgetown/adapt-viz`. `scripts/import-adapt.mjs PATH_TO_UPSTREAM_DATA` generates county geometry, historical observations, and industry/occupation detail files from its CSV/GeoJSON data. County IDs are numeric FIPS; the UI formats leading zeroes when needed. Source values retain their original units. Headline 2022 metrics and historical chart series are separately labelled because their source constructions can differ; the analyst must not substitute one for the other. ADAPT data through 2022 are historical/modelled estimates, not current economic conditions or causal policy evaluations.
 
 Explore includes a county map, up to four searchable counties, original metrics, historical charts, industry and occupation tables, and comparison CSV downloads. **Original dashboard** also provides the original hosted interface, with an external link if embedding is blocked.
 
@@ -45,7 +45,7 @@ Administrators listed in `ADMIN_EMAILS` can add sources. All authorized site vis
 
 Run `npx vitest run`, `npx tsc --noEmit`, and `npm run build`. Tests use an in-memory SQLite D1 stand-in and mocked provider responses: they validate routing, tool round trips, ownership, extraction, deletion, persistence, quota guards, and error handling, not live model quality. `scripts/smoke-ai.mjs` is a local-only live OpenAI test and incurs usage on the testing account.
 
-Live OpenAI verification on September 15, 2026 reached the API but returned `credit_balance_exhausted`. OpenRouter live inference requires the user’s OpenRouter key; no live success is claimed by the mocked tests.
+Live OpenAI verification on September 15, 2026 reached the API but returned `credit_balance_exhausted`. On September 16, a real OpenRouter run with `openai/gpt-5.6-luna` completed eight policymaker prompts and the document before/after experiment. The live score and the metric-series issue it exposed are recorded in [the live report](LIVE-EVAL-REPORT.md); mocked tests are still reported separately from live-model quality.
 
 ## Limitations
 

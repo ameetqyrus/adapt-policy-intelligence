@@ -3,7 +3,7 @@ import { readFile, writeFile } from "node:fs/promises";
 const base = (process.env.ADAPT_EVAL_BASE_URL || "http://localhost:3100").replace(/\/$/, "");
 const key = process.env.OPENROUTER_API_KEY || "";
 const cookie = process.env.ADAPT_EVAL_COOKIE || "__sites_local_auth=1";
-const model = process.env.OPENROUTER_MODEL || "openai/gpt-4.1-mini";
+const model = process.env.OPENROUTER_MODEL || "openai/gpt-5.6-luna";
 const cases = JSON.parse(await readFile(new URL("../evals/policy-maker-cases.json", import.meta.url), "utf8"));
 
 if (!key.startsWith("sk-or-")) {

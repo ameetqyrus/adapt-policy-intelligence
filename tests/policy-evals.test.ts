@@ -6,6 +6,7 @@ import { POST as createThread, DELETE as deleteThread } from "../app/api/investi
 import { POST as sendMessage } from "../app/api/investigations/[id]/messages/route";
 import { POST as addSource, DELETE as deleteSource } from "../app/api/sources/route";
 import { retrieve } from "../lib/evidence";
+import { profile } from "../lib/analyst";
 
 const base = "https://adapt.test";
 const headers = {
@@ -56,6 +57,17 @@ describe("OpenRouter model discovery", () => {
 });
 
 describe("policymaker investigation evaluation", () => {
+  it("keeps dashboard headline metrics distinct from the historical source series", async () => {
+    const shelby = await profile(39149, base);
+    const auglaize = await profile(39011, base);
+    if ("error" in shelby || "error" in auglaize)
+      throw new Error("Expected both evaluation counties to be available");
+    expect(shelby.headline2022.star_median2022.value).toBeCloseTo(49704.2212);
+    expect(auglaize.headline2022.star_median2022.value).toBeCloseTo(50967.7255);
+    expect(shelby.history.at(-1)?.wage).toBeCloseTo(25103.142);
+    expect(shelby.measurementRules.history).toContain("must not be substituted");
+  });
+
   it("covers the required decision and future-scenario prompt families", () => {
     expect(cases).toHaveLength(8);
     expect(new Set(cases.map((item) => item.id)).size).toBe(8);
