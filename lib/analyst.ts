@@ -161,7 +161,7 @@ export async function answer(args: {
           instructions: workspaceInstructions,
           input,
           tools: round < 3 ? functions : [],
-          max_output_tokens: 2200,
+          max_output_tokens: 6000,
           store: false,
         }),
         signal: AbortSignal.timeout(45000),
@@ -186,7 +186,10 @@ export async function answer(args: {
               : "OpenAI is temporarily unavailable. Please retry.",
       );
     }
-    data = (await r.json()) as { output?: Record<string, unknown>[] };
+    const response = (await r.json()) as { output?: Record<string, unknown>[]; status?: string };
+    if(response.status === 'incomplete' || response.status === 'failed')
+      throw new HttpError(502, 'The provider did not complete its answer. No incomplete answer was saved. Your question is preserved; please narrow it or choose another model.');
+    data = response;
     }
     const output = data.output || [];
     input.push(...output);

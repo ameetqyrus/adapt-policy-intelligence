@@ -25,6 +25,9 @@ describe('evidence-first context contract',()=>{
     expect(evidencePrinciples).toContain('Do not add unsolicited policy recommendations');
     expect(evidencePrinciples).toContain('never verified simulator output');
     expect(evidencePrinciples).toContain('not necessarily a causal evaluation');
+    expect(evidencePrinciples).toContain('Never convert that into a universal claim');
+    expect(evidencePrinciples).toContain('every requested section');
+    expect(evidencePrinciples).toContain('Synthetic evaluation fixtures are not real studies');
   });
   it('provides help for every major workflow and accurately labels source limitations',()=>{
     expect(helpSections.map(s=>s.id)).toEqual(expect.arrayContaining(['start','compare','chat','connect','sources','audit','policy','future','save','trouble']));

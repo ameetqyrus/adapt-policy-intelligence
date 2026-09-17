@@ -116,6 +116,15 @@ describe("policymaker investigation evaluation", () => {
     expect(calls).toHaveLength(2);
 
     await deleteSource(jsonRequest("/api/sources", { id: sourceId }, {}, "DELETE"));
+    expect((await retrieve('RIVERSTONE-27 retention childcare')).some(item=>item.sourceId===sourceId)).toBe(false);
+    stage = 'before';
+    const removedThread = await thread('Evidence eval after removal');
+    const removed = await sendMessage(jsonRequest('/message', { provider:'openrouter', model:'openai/gpt-example', message:question, counties:[39149,39011] }, {'x-openrouter-key':'sk-or-eval-fixture'}), {params:Promise.resolve({id:removedThread.id})});
+    expect(removed.status).toBe(200);
+    const removedAnswer=await removed.json() as {assistant:{content:string;citations:{id:string}[]}};
+    expect(removedAnswer.assistant.content).not.toContain('137');
+    expect(removedAnswer.assistant.citations.some(c=>c.id.startsWith(sourceId))).toBe(false);
+    await deleteThread(jsonRequest('/api/investigations',{id:removedThread.id},{},'DELETE'));
     await deleteThread(jsonRequest("/api/investigations", { id: beforeThread.id }, {}, "DELETE"));
     await deleteThread(jsonRequest("/api/investigations", { id: afterThread.id }, {}, "DELETE"));
   });
@@ -138,6 +147,7 @@ describe("policymaker investigation evaluation", () => {
     expect(response.status).toBe(200);
     expect((await response.text())).toContain(source.id + "-0");
     await deleteSource(jsonRequest("/api/sources", { id: source.id }, {}, "DELETE"));
+    expect((await retrieve(marker)).some(item=>item.sourceId===source.id)).toBe(false);
     await deleteThread(jsonRequest("/api/investigations", { id: investigation.id }, {}, "DELETE"));
   });
 });

@@ -10,6 +10,7 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { County, Investigation, Message } from "@/lib/types";
 import { Connection } from "./Connection";
 import policyEvalCases from "@/evals/policy-maker-cases.json";
@@ -321,7 +322,13 @@ export default function Investigations({
                 </p>
                 {m.role === 'assistant' && m.context && <small className="muted">Answered for FIPS {m.context.counties.map(id=>String(id).padStart(5,'0')).join(', ')} · {m.context.surface} · {new Date(m.createdAt).toLocaleString()}</small>}
                 <Markdown
+                  remarkPlugins={[remarkGfm]}
                   components={{
+                    table: ({ children }) => (
+                      <div className="answer-table-scroll" role="region" aria-label="Answer data table" tabIndex={0}>
+                        <table>{children}</table>
+                      </div>
+                    ),
                     a: ({ children, href }) => (
                       <a href={href} target="_blank" rel="noreferrer">
                         {children}
