@@ -8,8 +8,8 @@
   {
     "id": "policy-transfer",
     "title": "Policy transferability",
-    "prompt": "A retraining grant appeared to improve outcomes in Auglaize County. Should Shelby County copy it? Give me a decision memo separating facts, hypotheses, missing implementation evidence, and a practical evaluation design.",
-    "checks": ["rejects simple copy-and-paste causality", "identifies implementation and population differences", "proposes comparison measures", "gives a decision path"]
+    "prompt": "A retraining grant is said to have improved outcomes in Auglaize County. What documented evidence supports that claim? List any peer policies with jurisdiction, dates, sources and outcomes. Separate sourced facts from hypotheses and missing evidence; do not recommend that Shelby copy a program.",
+    "checks": ["does not assume the grant exists", "searches documented policies and evidence", "distinguishes adoption from causal effect", "avoids unsolicited policy prescriptions"]
   },
   {
     "id": "global-shock",
@@ -20,8 +20,8 @@
   {
     "id": "ai-exposure",
     "title": "AI task exposure",
-    "prompt": "What work could generative AI automate or augment in these counties? Distinguish tasks from jobs, near-term exposure from actual displacement, and local evidence from national research. Recommend three no-regret workforce actions.",
-    "checks": ["distinguishes tasks and jobs", "does not equate exposure with layoffs", "labels evidence geography", "provides actionable preparation"]
+    "prompt": "What work could generative AI automate or augment in these counties? Distinguish tasks from jobs, near-term exposure from actual displacement, and local evidence from national research. Describe documented examples and evidence gaps without prescribing local policy.",
+    "checks": ["distinguishes tasks and jobs", "does not equate exposure with layoffs", "labels evidence geography", "does not invent local programs or prescribe policy"]
   },
   {
     "id": "robots",
@@ -32,14 +32,14 @@
   {
     "id": "workforce-2030",
     "title": "2030 workforce outlook",
-    "prompt": "What might the workforce in Shelby and Auglaize counties look like in 2030? Give a baseline, upside, and downside scenario with explicit assumptions. Do not give a single-point forecast. Include early-warning indicators and policy choices that remain useful across scenarios.",
-    "checks": ["uses three conditional scenarios", "avoids false precision", "separates historical data from forecasts", "includes robust actions and indicators"]
+    "prompt": "What might the workforce in Shelby and Auglaize counties look like in 2030? Give a baseline, upside, and downside scenario with explicit assumptions. Do not give a single-point forecast. Include observable indicators and evidence gaps, not policy prescriptions.",
+    "checks": ["uses three conditional scenarios", "avoids false precision", "separates historical data from forecasts", "includes observable indicators without prescriptions"]
   },
   {
     "id": "portfolio",
-    "title": "Policy portfolio",
-    "prompt": "You have a constrained two-year county economic-development budget. Propose a sequenced portfolio for talent retention, employer resilience, and training. For every action specify the rationale, target group, delivery partner, leading metric, outcome metric, and a stop-or-scale rule.",
-    "checks": ["prioritizes under constraint", "defines implementation owners", "includes measurable outcomes", "defines stop-or-scale decisions"]
+    "title": "Peer policy evidence inventory",
+    "prompt": "List documented policies and institutions in the selected counties covering talent retention, employer resilience and training. Include adoption dates, status, primary sources and any reported outcomes. Leave unknown fields explicit; do not invent a spending portfolio or infer policy effectiveness from county scores.",
+    "checks": ["uses indexed policy records or explicit evidence gaps", "includes dates and status only where sourced", "distinguishes outcomes from causal effects", "does not recommend a spending portfolio"]
   },
   {
     "id": "calibration",

@@ -9,7 +9,7 @@ export async function GET(
     const r = await owned(id, u.id);
     const rows = await db()
       .prepare(
-        "SELECT id,role,content,citations,created_at AS createdAt FROM messages WHERE investigation_id=? ORDER BY created_at",
+        "SELECT id,role,content,citations,context,created_at AS createdAt FROM messages WHERE investigation_id=? ORDER BY created_at",
       )
       .bind(id)
       .all<{
@@ -18,6 +18,7 @@ export async function GET(
         content: string;
         citations: string;
         createdAt: string;
+        context: string | null;
       }>();
     return json({
       ...r,
@@ -25,6 +26,7 @@ export async function GET(
       messages: rows.results.map((m) => ({
         ...m,
         citations: JSON.parse(m.citations),
+        context: m.context ? JSON.parse(m.context) : null,
       })),
     });
   } catch (e) {

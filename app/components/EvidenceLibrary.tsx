@@ -422,7 +422,7 @@ export default function EvidenceLibrary({
                 </h3>
                 <footer>
                   <span>Reference link</span>
-                  {admin && (
+                  {admin && (/\.xlsx(?:\?|$)/i.test(s.url) ? <a href={s.url} target="_blank" rel="noreferrer">Download, then upload ↗</a> : (
                     <button
                       onClick={() => {
                         setAdding(true);
@@ -435,7 +435,7 @@ export default function EvidenceLibrary({
                     >
                       Index source <Plus size={13} />
                     </button>
-                  )}
+                  ))}
                 </footer>
               </article>
             ))}

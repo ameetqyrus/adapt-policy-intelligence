@@ -12,6 +12,18 @@ export const sources = sqliteTable("sources", {
   createdBy: text("created_by").notNull(),
   createdAt: text("created_at").notNull(),
 });
+export const policyRecords = sqliteTable('policy_records', {
+  id: text('id').primaryKey().notNull(),
+  countyId: integer('county_id').notNull(),
+  title: text('title').notNull(),
+  adoptedDate: text('adopted_date'),
+  status: text('status').notNull(),
+  outcome: text('outcome').notNull().default(''),
+  sourceId: text('source_id').notNull().references(()=>sources.id),
+  excerpt: text('excerpt').notNull(),
+  createdBy: text('created_by').notNull(),
+  createdAt: text('created_at').notNull(),
+}, t => [index('policy_records_county').on(t.countyId)]);
 export const chunks = sqliteTable(
   "chunks",
   {
@@ -46,6 +58,7 @@ export const messages = sqliteTable(
     role: text("role").notNull(),
     content: text("content").notNull(),
     citations: text("citations").notNull(),
+    context: text('context'),
     createdAt: text("created_at").notNull(),
   },
   (t) => [

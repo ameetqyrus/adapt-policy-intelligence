@@ -57,6 +57,7 @@ export type Message = {
   content: string;
   citations: Citation[];
   createdAt: string;
+  context?: { surface: string; counties: number[]; metric?: string; panel?: string; scenario?: { assumptions: string; output: string } } | null;
 };
 export type Investigation = {
   id: string;

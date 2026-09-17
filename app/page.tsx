@@ -12,6 +12,8 @@ import {
   Settings,
   Sun,
   X,
+  HelpCircle,
+  SlidersHorizontal,
 } from "lucide-react";
 import {
   County,
@@ -26,7 +28,10 @@ import EvidenceLibrary from "./components/EvidenceLibrary";
 import Trends from "./components/Trends";
 import WebTools from "./components/WebTools";
 import { ConnectionDialog, useConnection } from "./components/Connection";
-type View = "explore" | "investigate" | "sources" | "original";
+import Help from './components/Help';
+import Policies from './components/Policies';
+import type { WorkspaceContext } from '@/lib/workspace-context';
+type View = "explore" | "compare" | "simulator" | "investigate" | "sources" | "original" | "help";
 const colors = ["#164d72", "#4a7799", "#83a5bd", "#bfd3df", "#e5edf1"];
 function CountySearch({
   counties,
@@ -97,6 +102,7 @@ export default function Observatory() {
     [counties, setCounties] = useState<County[]>([]),
     [selected, setSelected] = useState<number[]>([39149, 39011]),
     [metric, setMetric] = useState("potential");
+  const [scenario, setScenario] = useState({ assumptions: '', output: '' });
   const [paths, setPaths] = useState<{ id: number; path: string }[]>([]),
     [details, setDetails] = useState<Record<string, CountyDetail>>({}),
     [error, setError] = useState(""),
@@ -122,6 +128,8 @@ export default function Observatory() {
       ),
     ])
       .then(([data, map]) => {
+        const initialView = new URL(location.href).searchParams.get('view');
+        if (initialView && ['explore','compare','simulator','investigate','sources','original','help'].includes(initialView)) setView(initialView as View);
         setCounties(data.counties);
         setPaths(map);
         const ids = (
@@ -179,12 +187,24 @@ export default function Observatory() {
   );
   function choose(id: number) {
     if (!byId.has(id)) return;
+    setScenario({assumptions:'',output:''});
     setSelected((old) =>
       old.includes(id)
         ? [id, ...old.filter((x) => x !== id)]
         : [id, ...old.slice(0, 3)],
     );
   }
+  function navigate(next: View) {
+    setView(next);
+    const url = new URL(location.href); url.searchParams.set('view',next); history.replaceState(null,'',url);
+    window.scrollTo({top:0,behavior:'instant'});
+  }
+  function changeCounties(ids: number[]) { setSelected(ids); setScenario({assumptions:'',output:''}); }
+  const workspaceContext: WorkspaceContext = {
+    surface: view === 'explore' ? 'map' : view === 'compare' ? 'comparison' : view === 'simulator' ? 'simulator' : 'investigation',
+    metric, panel: tab, ...(view === 'simulator' ? {scenario} : {}),
+  };
+  const askHere = () => document.getElementById('evidence-companion')?.scrollIntoView({behavior:'smooth',block:'start'});
   return (
     <main className="observatory">
       <aside className="obs-nav">
@@ -200,15 +220,18 @@ export default function Observatory() {
         <nav>
           {(
             [
-              ["explore", Compass, "Explore counties"],
+              ["explore", Compass, "Policy intelligence"],
+              ["compare", Layers, "Peer comparison"],
+              ["simulator", SlidersHorizontal, "Scenario workspace"],
               ["investigate", MessageSquare, "Investigations"],
               ["sources", BookOpen, "Evidence library"],
               ["original", Layers, "Original dashboard"],
+              ["help", HelpCircle, "Help & how to use"],
             ] as const
           ).map(([id, Icon, title]) => (
             <button
               className={view === id ? "active" : ""}
-              onClick={() => setView(id)}
+              onClick={() => navigate(id)}
               key={id}
             >
               <Icon size={19} />
@@ -243,7 +266,10 @@ export default function Observatory() {
           <div className="breadcrumb">
             Workspace <span>/</span>{" "}
             {view === "explore"
-              ? "Explore counties"
+              ? "Policy intelligence"
+              : view === 'compare' ? 'Peer comparison'
+              : view === 'simulator' ? 'Scenario workspace'
+              : view === 'help' ? 'Help & how to use'
               : view === "sources"
                 ? "Evidence library"
                 : view === "original"
@@ -272,6 +298,9 @@ export default function Observatory() {
               <h1>
                 {view === "explore"
                   ? "Opportunity has a geography."
+                  : view === 'compare' ? 'Learn from the evidence.'
+                  : view === 'simulator' ? 'Explore what could change.'
+                  : view === 'help' ? 'Make the most of ADAPT.'
                   : view === "sources"
                     ? "Build your evidence base."
                     : view === "original"
@@ -280,7 +309,10 @@ export default function Observatory() {
               </h1>
               <p>
                 {view === "explore"
-                  ? "Explore what is changing. Compare places. Ask what might explain the difference."
+                  ? "Explore where workers thrive. Compare places and examine the evidence behind local outcomes."
+                  : view === 'compare' ? 'Compare descriptive outcomes and documented peer policies. Draw your own conclusions.'
+                  : view === 'simulator' ? 'Discuss explicit assumptions and results without confusing scenarios with predictions.'
+                  : view === 'help' ? 'A step-by-step guide to counties, conversations, sources and uncertainty.'
                   : view === "sources"
                     ? "Bring sources into the conversation and control what informs your answers."
                     : view === "original"
@@ -291,10 +323,10 @@ export default function Observatory() {
             {view === "explore" && (
               <button
                 className="primary"
-                onClick={() => setView("investigate")}
+                onClick={askHere}
               >
                 <MessageSquare size={17} />
-                Start an investigation
+                Ask about this view
                 <ArrowUpRight size={16} />
               </button>
             )}
@@ -304,7 +336,7 @@ export default function Observatory() {
               {error}
             </div>
           )}
-          <div className="county-toolbar">
+          {view !== 'help' && <div className="county-toolbar">
             <CountySearch counties={counties} onSelect={choose} />
             <div className="county-chips">
               {chosen.map((c, i) => (
@@ -321,7 +353,7 @@ export default function Observatory() {
                     <button
                       aria-label={"Remove " + c.name}
                       onClick={() =>
-                        setSelected(selected.filter((id) => id !== c.countyid))
+                        changeCounties(selected.filter((id) => id !== c.countyid))
                       }
                     >
                       <X size={13} />
@@ -331,10 +363,11 @@ export default function Observatory() {
               ))}
             </div>
             <span className="toolbar-hint">Up to 4 counties</span>
-          </div>
-          {view === "explore" && (
+          </div>}
+          {(view === "explore" || view === 'compare') && (
             <>
-              <div className="explore-layout">
+              {view === 'compare' && <p className="baseline-note">ADAPT baseline · through 2022. Newer source documents supplement these measures; they do not replace or recalculate the model. Education spending for 2023–2024 has not yet been imported.</p>}
+              {view === 'explore' && <div className="explore-layout">
                 <section className="panel map-panel">
                   <div className="panel-heading">
                     <div>
@@ -450,7 +483,7 @@ export default function Observatory() {
                       <p>Similar starting conditions and workforce size.</p>
                       <button
                         onClick={() =>
-                          setSelected([home.countyid, home.peer!.countyid])
+                          {changeCounties([home.countyid, home.peer!.countyid]); navigate('compare');}
                         }
                       >
                         Compare this pair <ArrowUpRight size={15} />
@@ -459,12 +492,12 @@ export default function Observatory() {
                   )}
                   <button
                     className="text-action"
-                    onClick={() => setView("investigate")}
+                    onClick={askHere}
                   >
                     Ask about this county <ArrowUpRight size={16} />
                   </button>
                 </aside>
-              </div>
+              </div>}
               <div className="metric-strip">
                 {metrics.slice(1, 5).map((m) => (
                   <div key={m}>
@@ -611,8 +644,18 @@ export default function Observatory() {
                   </>
                 )}
               </section>
+              {view === 'compare' && <Policies counties={chosen} />}
             </>
           )}
+          {view === 'help' && <Help onConnect={() => setSettings(true)} />}
+          {view === 'simulator' && <section className="panel scenario-panel">
+            <p className="eyebrow">SCENARIO NOTES · NOT A SIMULATION ENGINE</p><h2>Bring assumptions and results into the conversation</h2>
+            <p>The original ADAPT Policy Simulator is not connected to this workspace yet. Its calculations have not been recreated or changed. Open the original dashboard to use its tools; copy relevant assumptions and results below for discussion.</p>
+            <a className="secondary" href="https://www.adaptdashboard.com/maps/adapt" target="_blank" rel="noreferrer">Open original ADAPT dashboard ↗</a>
+            <label>Assumptions / policy levers<textarea maxLength={3000} value={scenario.assumptions} onChange={e=>setScenario({...scenario,assumptions:e.target.value})} placeholder="Describe the scenario, year, county and assumptions." /></label>
+            <label>Copied simulator results · optional<textarea maxLength={3000} value={scenario.output} onChange={e=>setScenario({...scenario,output:e.target.value})} placeholder="Paste results with units and the model/version, if known." /></label>
+            <p className="muted">These notes are user-provided, not verified simulator output. They are sent with your next question and cleared when you change counties. The assistant must not manufacture numerical model results.</p>
+          </section>}
           {view === "original" && (
             <div className="panel original-panel">
               <div className="panel-heading">
@@ -640,12 +683,14 @@ export default function Observatory() {
               </p>
             </div>
           )}
-          <div hidden={view !== "investigate"}>
+          <div id="evidence-companion" hidden={!['explore','compare','simulator','investigate'].includes(view)}>
             <Investigations
               counties={chosen}
               connection={connection}
               onConnect={() => setSettings(true)}
-              onCounties={setSelected}
+              onCounties={changeCounties}
+              context={workspaceContext}
+              compact={view !== 'investigate'}
             />
           </div>
           <div hidden={view !== "sources"}>
@@ -654,7 +699,7 @@ export default function Observatory() {
               onConnect={() => setSettings(true)}
             />
           </div>
-          <WebTools counties={counties} onSelect={setSelected} />
+          <WebTools counties={counties} onSelect={changeCounties} />
           <footer className="workspace-footer">
             <span>ADAPT Observatory</span>
             <a

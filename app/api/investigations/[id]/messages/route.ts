@@ -1,5 +1,6 @@
 import { writable, db, body, json, fail, owned, HttpError,testingAvailable,reserveTestingRequest } from "@/lib/server";
 import { answer, validCounties } from "@/lib/analyst";
+import { normalizeContext } from '@/lib/workspace-context';
 export async function POST(
   request: Request,
   context: { params: Promise<{ id: string }> },
@@ -40,18 +41,20 @@ export async function POST(
     if(builtIn)key=await reserveTestingRequest(u);
     const history = await db()
       .prepare(
-        "SELECT role,content FROM messages WHERE investigation_id=? ORDER BY created_at DESC LIMIT 20",
+        "SELECT role,content,context FROM messages WHERE investigation_id=? ORDER BY created_at DESC LIMIT 20",
       )
       .bind(id)
-      .all<{ role: string; content: string }>();
+      .all<{ role: string; content: string; context: string | null }>();
+    const turnContext = {...normalizeContext(data.context), counties:ids};
     const result = await answer({
       provider,
       key,
       model,
       message,
-      history: history.results.reverse(),
+      history: history.results.reverse().map(m=>({role:m.role,content:m.content + (m.context ? '\n[Historical turn context, not current selection: '+m.context+']' : '')})),
       ids,
       origin: request.url,
+      context: turnContext,
     });
     const time = new Date().toISOString();
     const userId = crypto.randomUUID(),
@@ -59,12 +62,12 @@ export async function POST(
     await db().batch([
       db()
         .prepare(
-          "INSERT INTO messages (id,investigation_id,role,content,citations,created_at) VALUES (?,?,'user',?,'[]',?)",
+          "INSERT INTO messages (id,investigation_id,role,content,citations,created_at,context) VALUES (?,?,'user',?,'[]',?,?)",
         )
-        .bind(userId, id, message, time),
+        .bind(userId, id, message, time,JSON.stringify(turnContext)),
       db()
         .prepare(
-          "INSERT INTO messages (id,investigation_id,role,content,citations,created_at) VALUES (?,?,'assistant',?,?,?)",
+          "INSERT INTO messages (id,investigation_id,role,content,citations,created_at,context) VALUES (?,?,'assistant',?,?,?,?)",
         )
         .bind(
           assistantId,
@@ -72,6 +75,7 @@ export async function POST(
           result.content,
           JSON.stringify(result.citations),
           new Date(Date.now() + 1).toISOString(),
+          JSON.stringify(turnContext),
         ),
       db()
         .prepare(
@@ -93,12 +97,14 @@ export async function POST(
         content: message,
         citations: [],
         createdAt: time,
+        context:turnContext,
       },
       assistant: {
         id: assistantId,
         role: "assistant",
         ...result,
         createdAt: time,
+        context:turnContext,
       },
     });
   } catch (e) {

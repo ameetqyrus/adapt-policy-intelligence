@@ -13,6 +13,8 @@ import Markdown from "react-markdown";
 import { County, Investigation, Message } from "@/lib/types";
 import { Connection } from "./Connection";
 import policyEvalCases from "@/evals/policy-maker-cases.json";
+import type { WorkspaceContext } from '@/lib/workspace-context';
+import { labels } from '@/lib/types';
 export async function api<T=Record<string,unknown>>(url: string, options?: RequestInit):Promise<T> {
   const r = await fetch(url, options);
   const data = await r.json() as {error?:string};
@@ -38,11 +40,15 @@ export default function Investigations({
   connection,
   onConnect,
   onCounties,
+  context,
+  compact = false,
 }: {
   counties: County[];
   connection: Connection;
   onConnect: () => void;
   onCounties: (ids: number[]) => void;
+  context?: WorkspaceContext;
+  compact?: boolean;
 }) {
   const [threads, setThreads] = useState<Investigation[]>([]),
     [active, setActive] = useState<string | null>(null),
@@ -123,6 +129,7 @@ export default function Investigations({
           provider:connection.provider,
           model: connection.provider==='openrouter'?connection.routerModel:connection.model,
           counties: counties.map((c) => c.countyid),
+          context,
         }),
         headers: {
           "Content-Type": "application/json",
@@ -175,10 +182,11 @@ export default function Investigations({
               (m.role === "user" ? "Question" : "Analysis") +
               "\n\n" +
               m.content +
+              (m.context ? '\n\nContext when asked: ' + JSON.stringify(m.context) : '') +
               "\n\n" +
               m.citations
                 .map(
-                  (c) => "- [" + c.title + "](" + c.url + ")\n  " + c.excerpt,
+                  (c) => "- " + (c.url ? '[' + c.title + '](' + c.url + ')' : c.title) + "\n  " + c.excerpt,
                 )
                 .join("\n"),
           )
@@ -187,12 +195,13 @@ export default function Investigations({
     );
   }
   const starters = [
-    "Why might the same retraining policy produce different outcomes here?",
-    "How could a global manufacturing shock affect these places?",
-    "What could AI change about local work—and how should we prepare?",
+    ...(context?.surface === 'comparison' ? ["List documented policies in these peer counties, their dates and any evidence of outcomes."] : context?.surface === 'simulator' ? ["What do these user-provided scenario assumptions and results support, and what remains uncertain?"] : ["What are the major industries in this county?"]),
+    "How are schools financed in this county? Distinguish documented evidence from gaps.",
+    "How has trade affected these counties? What is observed rather than inferred?",
+    "What could AI change about local work by 2030 under different assumptions?",
   ];
   return (
-    <section className="investigation-layout">
+    <section className={'investigation-layout' + (compact ? ' embedded-companion' : '')}>
       <aside className="panel thread-panel">
         <button
           className="secondary new-thread"
@@ -243,10 +252,11 @@ export default function Investigations({
             <strong>
               {active
                 ? threads.find((t) => t.id === active)?.title || "Investigation"
-                : "A question worth following"}
+                : "Ask the evidence companion"}
             </strong>
             <small>{counties.map((c) => c.name).join(" · ")}</small>
           </div>
+          {compact && <button className="secondary" onClick={start} disabled={busy || loading}>New conversation</button>}
           {messages.length > 0 && (
             <button
               className="icon-btn"
@@ -269,7 +279,7 @@ export default function Investigations({
               <h2>
                 Start anywhere.
                 <br />
-                Keep asking.
+                Follow the evidence.
               </h2>
               <p>
                 Explore a difference you noticed, a policy decision, or an event
@@ -291,7 +301,7 @@ export default function Investigations({
                 <summary>Policymaker evaluation prompts · {policyEvalCases.length}</summary>
                 <p>
                   Run the same prompts across models to compare grounding,
-                  uncertainty and decision usefulness.
+                  uncertainty and evidence quality. Automated test results are reported separately from live model evaluations.
                 </p>
                 <div>
                   {policyEvalCases.map((item) => (
@@ -307,8 +317,9 @@ export default function Investigations({
             messages.map((m) => (
               <article key={m.id} className={"message " + m.role}>
                 <p className="message-role">
-                  {m.role === "user" ? "YOU" : "ADAPT · ANALYSIS"}
+                  {m.role === "user" ? "YOU" : "ADAPT · EVIDENCE"}
                 </p>
+                {m.role === 'assistant' && m.context && <small className="muted">Answered for FIPS {m.context.counties.map(id=>String(id).padStart(5,'0')).join(', ')} · {m.context.surface} · {new Date(m.createdAt).toLocaleString()}</small>}
                 <Markdown
                   components={{
                     a: ({ children, href }) => (
@@ -323,7 +334,7 @@ export default function Investigations({
                 {m.citations.length > 0 && (
                   <details className="answer-evidence">
                     <summary>
-                      <BookOpen size={14} /> Evidence & provenance ·{" "}
+                      <BookOpen size={14} /> Audit evidence ·{" "}
                       {m.citations.length}
                     </summary>
                     <p className="muted">
@@ -373,8 +384,8 @@ export default function Investigations({
             </div>
           )}
           <div className="context-notice">
-            Using the counties selected above. Change them at any time to take
-            the conversation elsewhere.
+            Context: {context?.surface === 'map' ? 'Policy intelligence / map' : context?.surface === 'comparison' ? 'Peer comparison' : context?.surface === 'simulator' ? 'Scenario workspace · user-provided assumptions' : 'Investigation'}
+            {context?.metric && ' · ' + labels[context.metric]}. Using {counties.map(c=>c.name).join(' · ')} for the next question. Previous answers are not recalculated.
           </div>
           <form
             className="composer"

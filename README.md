@@ -1,5 +1,9 @@
 # ADAPT Policy Intelligence
 
+## Latest Observatory update
+
+The unified app includes contextual evidence chat beneath the county map and peer comparison, a source-backed peer-policy register, and searchable **Help & how to use** with a downloadable user guide. See [implementation status and verification](docs/SEPTEMBER17-UPDATE.md) for completed work and remaining simulator/data dependencies. Older deployment documentation below is retained for reference.
+
 > This branch contains **ADAPT Observatory**, the unified workspace. See [the Observatory guide](docs/OBSERVATORY.md) for current setup, OpenAI/OpenRouter connections, how answers are produced, and how to add or remove data sources. The documentation below describes the original application, retained in `app/legacy.tsx`.
 
 ADAPT Policy Intelligence is a county-comparison interface built on data from the [American Dream Achievability Progress Tracker (ADAPT)](https://www.adaptdashboard.com/maps/adapt). It lets a user select a home county, use ADAPT's computed peer or choose a manual comparison, inspect key indicators, ask a policy-oriented question, review linked evidence, and download an HTML briefing.

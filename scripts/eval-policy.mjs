@@ -39,8 +39,8 @@ function assess(item, result) {
   const text = result.answer.toLowerCase();
   const signals = {
     uncertainty: /uncertain|unknown|cannot|limitation|assum/.test(text),
-    evidence: result.citations.length > 0,
-    action: /recommend|action|monitor|indicator|measure|evaluate/.test(text),
+    evidence: result.citations.some(c => result.answer.includes('[' + c.id + ']')),
+    descriptive: !/##?\s*(recommended actions|act now|policy prescriptions|recommended portfolio)/i.test(result.answer),
     calibrated: !/exactly \d+ jobs|will eliminate \d+/.test(text),
   };
   return { ...item, ...result, signals, pass: Object.values(signals).every(Boolean) };
