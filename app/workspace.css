@@ -341,6 +341,35 @@ html[data-theme=dark] .mini-map { filter:brightness(1.25); }
   .adapt-hero-copy { padding-inline:24px; }
   .public-page { padding-inline:2px; }
 }
+
+/* Ravi review: keep the V2 content inside the integrated left-hand workspace. */
+.observatory { display:flex; }
+.v2-left-nav { width:264px; padding:22px 14px 16px; }
+.v2-left-nav .obs-brand { display:flex; align-items:center; gap:11px; padding:0 10px 20px; }
+.v2-left-nav .obs-brand>span:last-child { min-width:0; display:grid; }
+.v2-left-nav .obs-brand b { font:700 1.05rem/1 Georgia,serif; letter-spacing:.04em; }
+.v2-left-nav .obs-brand small { max-width:175px; margin-top:5px; color:#b5c6d1; font-size:.48rem; line-height:1.25; letter-spacing:.1em; }
+.v2-left-nav nav { display:grid; gap:2px; }
+.v2-left-nav nav .nav-caption { margin:5px 11px 6px; }
+.v2-left-nav nav .nav-caption.nav-section { margin-top:13px; }
+.v2-left-nav nav button { min-height:37px; padding:8px 10px; font-size:.79rem; }
+.v2-left-nav nav button.observatory-link { border:1px solid rgba(248,224,142,.24); color:#f5dfa0; }
+.v2-left-nav nav button.observatory-link.active { color:#fff; }
+.v2-left-nav .nav-bottom { margin-top:18px; padding:14px 10px 2px; border-top:1px solid rgba(255,255,255,.1); }
+.v2-left-nav .settings-link { width:100%; }
+.obs-main,.home-main { margin-left:264px; }
+.home-main .obs-content { max-width:none; padding:0; }
+
+@media(max-width:950px) {
+  .observatory { display:block; }
+  .v2-left-nav { position:sticky; inset:0 0 auto; width:100%; min-height:68px; flex-direction:row; align-items:center; gap:12px; padding:10px 14px; overflow:visible; }
+  .v2-left-nav .obs-brand { flex:0 0 auto; padding:0; }
+  .v2-left-nav .obs-brand small,.v2-left-nav nav .nav-caption,.v2-left-nav .nav-bottom { display:none; }
+  .v2-left-nav nav { min-width:0; flex:1; display:flex; gap:4px; margin:0; overflow-x:auto; }
+  .v2-left-nav nav button { flex:0 0 auto; white-space:nowrap; }
+  .v2-left-nav nav button svg { width:16px; }
+  .obs-main,.home-main { margin-left:0; }
+}
 .dialog-icon {
   width: 52px;
   height: 52px;

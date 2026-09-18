@@ -3,8 +3,14 @@ import { useEffect, useMemo, useState } from "react";
 import {
   ArrowUpRight,
   BookOpen,
+  Building2,
+  ChartNoAxesCombined,
   ChevronDown,
   ChevronRight,
+  Compass,
+  Handshake,
+  Home as HomeIcon,
+  Map as MapIcon,
   Menu,
   MessageSquare,
   Moon,
@@ -60,7 +66,7 @@ const viewLabels: Record<View, string> = {
   help: "Help",
 };
 
-function SiteHeader({
+export function SiteHeader({
   view,
   dark,
   navigate,
@@ -152,6 +158,68 @@ function SiteHeader({
       </aside>
     </div>}
   </>;
+}
+
+function SiteSidebar({
+  view,
+  metric,
+  dark,
+  navigate,
+  navigateMap,
+  onTheme,
+  onConnect,
+}: {
+  view: View;
+  metric: string;
+  dark: boolean;
+  navigate: (view: View) => void;
+  navigateMap: (metric: string) => void;
+  onTheme: () => void;
+  onConnect: () => void;
+}) {
+  const item = (target: View, label: string, icon: React.ReactNode, extra = "") => (
+    <button className={`${view === target ? "active" : ""} ${extra}`.trim()} onClick={() => navigate(target)}>
+      {icon}{label}{view === target && <span className="nav-line" />}
+    </button>
+  );
+  const mapItem = (targetMetric: string, label: string, icon: React.ReactNode) => {
+    const active = view === "explore" && metric === targetMetric;
+    return <button className={active ? "active" : ""} onClick={() => navigateMap(targetMetric)}>
+      {icon}{label}{active && <span className="nav-line" />}
+    </button>;
+  };
+  return <aside className="obs-nav v2-left-nav">
+    <button className="obs-brand" onClick={() => navigate("home")} aria-label="ADAPT home">
+      <span className="brand-mark">A<span /></span>
+      <span><b>ADAPT</b><small>AMERICAN DREAM ACHIEVABILITY PROGRESS TRACKER</small></span>
+    </button>
+    <nav aria-label="Primary navigation">
+      <p className="nav-caption">DASHBOARD</p>
+      {item("home", "Home", <HomeIcon size={18} />)}
+      {item("insights", "Insights", <MessageSquare size={18} />)}
+      <p className="nav-caption nav-section">MAPS</p>
+      {mapItem("potential", "ADAPT Index", <MapIcon size={18} />)}
+      {mapItem("pct_pred_emp_gain", "Services job gains", <ChartNoAxesCombined size={18} />)}
+      {mapItem("pct_pred_emp_loss", "Manufacturing trade", <Building2 size={18} />)}
+      <p className="nav-caption nav-section">TOOLS</p>
+      {item("investigate", "Policy Intelligence", <MessageSquare size={18} />)}
+      {item("compare", "Peer comparison", <Users size={18} />)}
+      {item("simulator", "Policy simulator", <SlidersHorizontal size={18} />)}
+      <p className="nav-caption nav-section">OBSERVATORY</p>
+      {item("observatory", "Overview", <Telescope size={18} />, "observatory-link")}
+      {item("sources", "Evidence library", <BookOpen size={18} />)}
+      <p className="nav-caption nav-section">ABOUT</p>
+      {item("story", "Our story", <Compass size={18} />)}
+      {item("team", "Our team", <Users size={18} />)}
+      {item("research", "Our research", <BookOpen size={18} />)}
+      {item("support", "Partner with us", <Handshake size={18} />)}
+      {item("help", "Help", <HelpCircle size={18} />)}
+    </nav>
+    <div className="nav-bottom">
+      <button className="settings-link" onClick={onConnect}><Settings size={18} />AI connection</button>
+      <button className="settings-link" onClick={onTheme}>{dark ? <Sun size={18} /> : <Moon size={18} />} {dark ? "Light appearance" : "Dark appearance"}</button>
+    </div>
+  </aside>;
 }
 
 function AdaptHome({
@@ -474,7 +542,7 @@ export default function Observatory() {
   };
   return (
     <main className={view === 'home' ? 'observatory home-mode' : 'observatory'}>
-      <SiteHeader view={view} dark={dark} navigate={navigate} navigateMap={navigateMap} onTheme={() => setDark(!dark)} onConnect={() => setSettings(true)} />
+      <SiteSidebar view={view} metric={metric} dark={dark} navigate={navigate} navigateMap={navigateMap} onTheme={() => setDark(!dark)} onConnect={() => setSettings(true)} />
       <section className={view === 'home' ? 'obs-main home-main' : 'obs-main'}>
         <div className="obs-content">
           {view === 'home' && <AdaptHome onExplore={() => navigateMap('potential')} onCompare={() => navigate('compare')} onSimulate={() => navigate('simulator')} />}
@@ -865,11 +933,11 @@ export default function Observatory() {
           </div>
           <WebTools counties={counties} onSelect={changeCounties} />
         </div>
+        <footer className="v2-site-footer">
+          <div><section><h2>American Dream Achievability Progress Tracker</h2><p>A research project of the Georgetown University Lab for Globalization and Shared Prosperity, tracking county-level economic opportunity for workers without a four-year degree.</p></section><address><strong>Lab for Globalization and Shared Prosperity</strong><br/>Georgetown University<br/>37th and O Streets NW<br/>Washington, DC 20057</address></div>
+          <p>© {new Date().getFullYear()} Georgetown University Lab for Globalization and Shared Prosperity.</p>
+        </footer>
       </section>
-      <footer className="v2-site-footer">
-        <div><section><h2>American Dream Achievability Progress Tracker</h2><p>A research project of the Georgetown University Lab for Globalization and Shared Prosperity, tracking county-level economic opportunity for workers without a four-year degree.</p></section><address><strong>Lab for Globalization and Shared Prosperity</strong><br/>Georgetown University<br/>37th and O Streets NW<br/>Washington, DC 20057</address></div>
-        <p>© {new Date().getFullYear()} Georgetown University Lab for Globalization and Shared Prosperity.</p>
-      </footer>
       {settings && (
         <ConnectionDialog
           connection={connection}
