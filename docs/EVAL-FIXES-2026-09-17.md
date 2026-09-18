@@ -19,7 +19,20 @@
 
 ## Live AI verification boundaries
 
-The previous live run remains documented in `LIVE-EVAL-2026-09-17.md`; its results are not relabelled as passes after these changes. A fresh Luna run is required to grade the changed prompt and output handling.
+The previous live run remains documented in `LIVE-EVAL-2026-09-17.md`; its results are not relabelled as passes after these changes.
+
+### Fresh live regression run after publication
+
+Same deployed site, counties 39149/39011, separate new investigations, and the same displayed OpenRouter alias `~openai/gpt-luna-latest`. Exact prompts are unchanged from the original report. These are real AI responses, not mocks. Four targeted cases were rerun; the full eight-case suite was not repeated. Full responses are saved in Investigations.
+
+| Case | Answer timestamp (IST) | Result and observed evidence |
+| --- | --- | --- |
+| Global shock | 19:13:12 | PASS for the previously failed requirements: complete downside/adaptation/opportunity scenarios, industries and occupations, and a five-part leading-indicator dashboard. Concludes with a complete evidence caveat. Two semantic answer tables detected in the live DOM. |
+| Humanoid robots | 19:14:00 | PASS: conditional assumptions, task changes, technology/labor/distribution indicators and a complete closing evidence-gap paragraph. No invented county adoption rates. |
+| 2030 workforce | 19:14:41 | PASS: baseline/upside/downside table, explicit assumptions, observable indicators and complete evidence gaps. Ends by distinguishing county comparisons from causal explanations. |
+| Calibration | 19:15:01 | PASS for the targeted public-evidence overreach: no invented count or employers; no claim that no reliable public estimate exists anywhere. States that no employer announcements or validated estimates were in the indexed evidence. Press wording now refers to limitations of available county data. Opening language remains categorical about an exact future count; use the accompanying evidence limits when communicating externally. |
+
+These single-run passes demonstrate the previously observed failures were not reproduced; they do not guarantee every future model response. Bounded retry/failure paths were covered by automated tests, not deliberately triggered in the live run. No provider-resolved immutable model ID, token counts, or finish-reason trace was captured.
 
 The end-to-end live model source experiment still needs browser file-upload permission. Website indexing also needs a configured funded Firecrawl key. These blocked checks are not equivalent to the mocked integration tests or the successful local HTTP upload test.
 

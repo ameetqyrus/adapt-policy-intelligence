@@ -1,6 +1,7 @@
 import { writable, db, body, json, fail, owned, HttpError,testingAvailable,reserveTestingRequest } from "@/lib/server";
 import { answer, validCounties } from "@/lib/analyst";
 import { normalizeContext } from '@/lib/workspace-context';
+import { DEFAULT_OPENROUTER_MODEL } from '@/lib/openrouter-presets';
 export async function POST(
   request: Request,
   context: { params: Promise<{ id: string }> },
@@ -19,7 +20,7 @@ export async function POST(
     if ((!key && !testingAvailable(u)) || (key && !key.startsWith("sk-")) || key.length > 512)
       throw new HttpError(400, "Add your OpenAI API key in AI connection.");
     const message = String(data.message || "").trim(),
-      model = builtIn?'gpt-4.1-mini':String(data.model || (provider==='openrouter'?'openai/gpt-4.1-mini':"gpt-4.1-mini"));
+      model = builtIn?'gpt-4.1-mini':String(data.model || (provider==='openrouter'?DEFAULT_OPENROUTER_MODEL:"gpt-4.1-mini"));
     if (!message || message.length > 6000)
       throw new HttpError(400, "Enter a question up to 6,000 characters.");
     if (!(provider==='openrouter'?/^[~a-zA-Z0-9._:-]+\/[a-zA-Z0-9._:/-]+$/:/^[a-zA-Z0-9._:-]+$/).test(model)||model.length>150)

@@ -2,12 +2,13 @@
 import { useEffect, useRef, useState } from "react";
 import { KeyRound, X } from "lucide-react";
 import OpenRouterModelPicker from "./OpenRouterModelPicker";
+import { DEFAULT_OPENROUTER_MODEL, normalizeRouterModel } from '@/lib/openrouter-presets';
 export type Connection = { key: string; model: string; firecrawl: string; testingAvailable?:boolean; provider:'openai'|'openrouter';routerKey:string;routerModel:string };
 export const emptyConnection: Connection = {
   key: "",
   model: "gpt-4.1-mini",
   firecrawl: "",
-  provider:'openai',routerKey:'',routerModel:'openai/gpt-4.1-mini',
+  provider:'openai',routerKey:'',routerModel:DEFAULT_OPENROUTER_MODEL,
 };
 export function useConnection() {
   const [connection, set] = useState<Connection>(emptyConnection);
@@ -16,7 +17,7 @@ export function useConnection() {
       const saved = JSON.parse(
         sessionStorage.getItem("adapt-connection") || "null",
       );
-      if (saved) set({ ...emptyConnection, key:saved.key||'',model:saved.model||emptyConnection.model,firecrawl:saved.firecrawl||'',provider:saved.provider==='openrouter'?'openrouter':'openai',routerKey:saved.routerKey||'',routerModel:saved.routerModel||emptyConnection.routerModel });
+      if (saved) set({ ...emptyConnection, key:saved.key||'',model:saved.model||emptyConnection.model,firecrawl:saved.firecrawl||'',provider:saved.provider==='openrouter'?'openrouter':'openai',routerKey:saved.routerKey||'',routerModel:normalizeRouterModel(saved.routerModel) });
     } catch {}
     fetch('/api/session').then(r=>r.json()).then(data=>set(current=>({...current,testingAvailable:(data as {testingAvailable?:boolean}).testingAvailable===true}))).catch(()=>{});
   }, []);
@@ -67,7 +68,7 @@ export function ConnectionDialog({
           onClose();
         }}
       >
-        <label>AI provider<select aria-label="AI provider" value={draft.provider} onChange={e=>setDraft({...draft,provider:e.target.value as Connection['provider']})}><option value="openai">OpenAI</option><option value="openrouter">OpenRouter</option></select></label>
+        <label>AI provider<select aria-label="AI provider" value={draft.provider} onChange={e=>setDraft({...draft,provider:e.target.value as Connection['provider'],...(e.target.value==='openrouter'?{routerModel:DEFAULT_OPENROUTER_MODEL}:{})})}><option value="openai">OpenAI</option><option value="openrouter">OpenRouter</option></select></label>
         <label>
           {draft.provider==='openrouter'?'OpenRouter API key':'OpenAI API key'}
           <input
@@ -79,7 +80,7 @@ export function ConnectionDialog({
             onChange={(e) => setDraft({ ...draft, [draft.provider==='openrouter'?'routerKey':'key']: e.target.value.trim() })}
           />
         </label>
-        {draft.provider==='openrouter'?<OpenRouterModelPicker apiKey={draft.routerKey} value={draft.routerModel} onChange={routerModel=>setDraft({...draft,routerModel})}/>:<label>
+        {draft.provider==='openrouter'?<OpenRouterModelPicker value={draft.routerModel} onChange={routerModel=>setDraft({...draft,routerModel})}/>:<label>
           Model ID
           <input required value={draft.model} list="model-choices" onChange={(e) => setDraft({ ...draft, model: e.target.value.trim() })}/>
         </label>}
@@ -88,7 +89,7 @@ export function ConnectionDialog({
           <option value="gpt-4.1" />
         </datalist>
         <small>
-          {draft.provider==='openrouter'?<>Use a full provider/model ID supporting tool calling. <a href="https://openrouter.ai/models?supported_parameters=tools" target="_blank" rel="noreferrer">Browse compatible models ↗</a></>:'Use a model available to your OpenAI project that supports Responses and function calling.'}
+          {draft.provider==='openrouter'?'Choose from three GPT models. GPT Luna is the default when switching to OpenRouter. Your OpenRouter key and credits are required to chat.':'Use a model available to your OpenAI project that supports Responses and function calling.'}
         </small>
         <details>
           <summary>Website indexing · optional</summary>
