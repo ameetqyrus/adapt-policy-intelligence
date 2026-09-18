@@ -8,6 +8,7 @@ import {
   ChevronDown,
   ChevronRight,
   Compass,
+  Factory,
   Handshake,
   Home as HomeIcon,
   Map as MapIcon,
@@ -42,8 +43,12 @@ import { ConnectionDialog, useConnection } from "./components/Connection";
 import Help from './components/Help';
 import Policies from './components/Policies';
 import PolicySimulator from './components/PolicySimulator';
+import EmployerTradeExposure from './components/EmployerTradeExposure';
+import V2MapContext, { V2CountyProfile } from './components/V2MapContext';
+import V2PeerComparison from './components/V2PeerComparison';
 import type { WorkspaceContext } from '@/lib/workspace-context';
-type View = "home" | "maps" | "explore" | "tools" | "compare" | "simulator" | "investigate" | "observatory" | "sources" | "insights" | "story" | "faculty" | "team" | "research" | "support" | "contact" | "help";
+import { formatV2MapValue, type V2CountyContent, v2Level, v2MapRankValue, v2MapValue, zScoreLevel } from '@/lib/v2-content';
+type View = "home" | "maps" | "explore" | "tools" | "compare" | "simulator" | "employer" | "investigate" | "observatory" | "sources" | "insights" | "story" | "faculty" | "team" | "research" | "support" | "contact" | "help";
 const colors = ["#164d72", "#4a7799", "#83a5bd", "#bfd3df", "#e5edf1"];
 
 const viewLabels: Record<View, string> = {
@@ -53,6 +58,7 @@ const viewLabels: Record<View, string> = {
   tools: "All tools",
   compare: "Peer Comparison",
   simulator: "Policy Simulator",
+  employer: "Employer Trade Exposure",
   investigate: "ADAPT Policy Intelligence",
   observatory: "Observatory",
   sources: "Evidence Library",
@@ -109,6 +115,7 @@ export function SiteHeader({
           <button onClick={() => go('investigate')}>Policy Intelligence</button>
           <button onClick={() => go('compare')}>Peer Comparison</button>
           <button onClick={() => go('simulator')}>Policy Simulator</button>
+          <button onClick={() => go('employer')}>Employer Trade Exposure</button>
         </div></details>
         <button className={view === 'insights' ? 'current' : ''} onClick={() => go('insights')}>Insights</button>
         <button className={view === 'story' ? 'current' : ''} onClick={() => go('story')}>Our Story</button>
@@ -143,6 +150,7 @@ export function SiteHeader({
           <button onClick={() => go('investigate')}>Policy Intelligence</button>
           <button onClick={() => go('compare')}>Peer Comparison</button>
           <button onClick={() => go('simulator')}>Policy Simulator</button>
+          <button onClick={() => go('employer')}>Employer Trade Exposure</button>
           <p>OUR TEAM</p>
           <button onClick={() => go('faculty')}>Faculty leadership</button>
           <button onClick={() => go('team')}>ADAPT core team</button>
@@ -205,6 +213,7 @@ function SiteSidebar({
       {item("investigate", "Policy Intelligence", <MessageSquare size={18} />)}
       {item("compare", "Peer comparison", <Users size={18} />)}
       {item("simulator", "Policy simulator", <SlidersHorizontal size={18} />)}
+      {item("employer", "Employer trade exposure", <Factory size={18} />)}
       <p className="nav-caption nav-section">OBSERVATORY</p>
       {item("observatory", "Overview", <Telescope size={18} />, "observatory-link")}
       {item("sources", "Evidence library", <BookOpen size={18} />)}
@@ -226,10 +235,12 @@ function AdaptHome({
   onExplore,
   onCompare,
   onSimulate,
+  onStory,
 }: {
   onExplore: () => void;
   onCompare: () => void;
   onSimulate: () => void;
+  onStory: () => void;
 }) {
   const features = [
     {
@@ -270,6 +281,17 @@ function AdaptHome({
         <div><dt>3</dt><dd>decades of data</dd></div>
         <div><dt>every 3 years</dt><dd>index refresh</dd></div>
       </dl>
+      <section className="why-adapt">
+        <div>
+          <p className="eyebrow">WHY ADAPT?</p>
+          <h2>The American Dream depends on whether communities can turn economic change into opportunity.</h2>
+        </div>
+        <div>
+          <p>Manufacturing decline, global competition and automation have affected American communities unevenly—especially workers without a four-year degree. Retreating from global markets would also limit future opportunity. The challenge is to understand why some places translate economic change into mobility while comparable places fall behind.</p>
+          <p>ADAPT brings three decades of county-level evidence together to show where workers are adapting, why outcomes differ among peers, and which practical actions communities should investigate.</p>
+          <button className="text-action" onClick={onStory}>Read why ADAPT was created <ArrowUpRight size={16}/></button>
+        </div>
+      </section>
       <section className="adapt-purpose">
         <p className="eyebrow">WHAT ADAPT DOES</p>
         <div className="purpose-grid v2-purpose-grid">
@@ -301,13 +323,20 @@ function AdaptHome({
 
 function StoryPage() {
   const blocks = [
-    ["Mission", "We advance research on how open markets can enhance upward mobility for all workers, especially those without a college degree, to guide public policy toward a more inclusive future."],
+    ["Mission", "We advance research on how open markets can enhance upward mobility for all workers (especially those without a college degree) to guide public policy toward a more inclusive future."],
     ["Motivation", "For decades, workers without college degrees disproportionately bore the costs of economic disruption while the benefits went elsewhere. The Lab exists to uncover how disruption can be harnessed to generate shared prosperity."],
     ["Goals", "Our findings aim to foster dialogue on policy reform and empower individuals and communities with information about the evolving economy."],
   ];
   return <div className="public-page">
     <header><p className="eyebrow">OUR STORY</p><h1>A lab dedicated to including workers in economic progress</h1></header>
     <div className="story-grid">{blocks.map(([title, body]) => <section className="panel" key={title}><p className="eyebrow">{title}</p><p>{body}</p></section>)}</div>
+    <section className="panel story-background"><p className="eyebrow">BACKGROUND</p><h2>Why the Lab and ADAPT exist</h2>
+      <p>The American Dream—the ideal that individuals can achieve economic success and upward mobility through hard work—has become increasingly difficult for younger generations to attain, particularly for individuals without a college education. Labor-market shifts over more than two decades have caused a significant decline in manufacturing employment and many entry-level jobs. The consequences are especially severe for communities that historically relied on manufacturing, leaving many workers without clear pathways to economic mobility.</p>
+      <p>Younger workers are often the first affected by job displacement and the last to benefit from recovery. Many young adults without a degree have faced diminished job prospects and lower wages, hindering upward mobility and contributing to broader socioeconomic inequality.</p>
+      <p>Policymakers, scholars, activists and the public often blame globalization for these losses. Yet preventing America from engaging in global competition would ultimately limit future economic opportunities. Global engagement has historically supported social mobility, economic growth, government revenue, affordable consumer goods and new employment.</p>
+      <p>The hurdle to the American Dream is not globalization itself, but the unequal distribution of its benefits. America must capture the opportunities created by an open economy while increasing the number of workers and families who share in them.</p>
+      <p>Established in 2023, the Lab combines action-oriented research with pragmatic societal change. ADAPT provides data-driven evidence about the relationship between globalization and the well-being of American communities. The lessons learned from trade and automation can also help communities prepare for future changes such as generative AI.</p>
+    </section>
     <section className="panel story-wide"><p className="eyebrow">WHERE ADAPT FITS</p><h2>Measurement that helps communities ask better questions</h2><p>The Lab&apos;s first major initiative created the American Dream Achievability Progress Tracker (ADAPT), which ranks cities and counties based on their ability to leverage globalization to improve the lives of the median voter. ADAPT captures how local fiscal policies, particularly investments in K-12 and vocational education, have supported local economies and promoted upward mobility (or not) for non-college educated workers, specifically in the wake of trade shocks. Ultimately, the Lab hopes to expand ADAPT into a Global Index for Shared Prosperity.</p><p>In tandem with ADAPT, the Lab also produces focused research on the relationship between globalization and labor, social investment, gender, race, and climate.</p></section>
   </div>;
 }
@@ -340,6 +369,7 @@ function ToolsPage({ navigate }: { navigate: (view: View) => void }) {
     ["Policy Intelligence", "Ask grounded questions about a county pair", "Compare a county with its ADAPT-computed peer, then ask a question. Model facts, policy context and every cited source are kept separate.", "investigate", <MessageSquare key="policy" size={23}/>],
     ["Peer Comparison", "Compare a county with its peers", "See how well a county is adapting next to an auto-suggested peer, or choose your own comparison, with the evidence visible beside the answer.", "compare", <Users key="peer" size={23}/>],
     ["Policy Simulator", "Test a county policy scenario", "Move the four published V2 levers and discuss what changed, what the model assumes and what the result cannot establish.", "simulator", <SlidersHorizontal key="simulator" size={23}/>],
+    ["Employer", "Employer trade exposure by commuting zone", "Switch between exports, direct import competition and downstream exposure to see the share of local employment at trade-exposed employers.", "employer", <Factory key="employer" size={23}/>],
   ];
   return <div className="public-page v2-index-page"><header><p className="eyebrow">TOOLS</p><h1>Put the ADAPT data to work</h1><p>Interactive tools built on the ADAPT dataset: policy intelligence, peer county comparison, and a policy simulator for scenario testing. Each tool includes a grounded conversation at the bottom.</p></header><div className="v2-card-grid">{tools.map(([name, title, body, target, icon]) => <button className="v2-route-card tool-card" onClick={() => navigate(target)} key={name}><span className="tool-icon">{icon}</span><h3>{name}</h3><small>{title}</small><p>{body}</p><strong>Open tool <ChevronRight size={16}/></strong></button>)}</div></div>;
 }
@@ -429,6 +459,7 @@ export default function Observatory() {
   const { connection, save } = useConnection();
   const [view, setView] = useState<View>("home"),
     [counties, setCounties] = useState<County[]>([]),
+    [v2Counties, setV2Counties] = useState<V2CountyContent[]>([]),
     [selected, setSelected] = useState<number[]>([39149, 39011]),
     [metric, setMetric] = useState("potential");
   const [scenario, setScenario] = useState({ assumptions: '', output: '' });
@@ -444,6 +475,10 @@ export default function Observatory() {
     () => new Map(counties.map((c) => [c.countyid, c])),
     [counties],
   );
+  const v2ById = useMemo(
+    () => new Map(v2Counties.map((county) => [county.countyid, county])),
+    [v2Counties],
+  );
   const chosen = selected
       .map((id) => byId.get(id))
       .filter((c): c is County => Boolean(c)),
@@ -456,12 +491,16 @@ export default function Observatory() {
       fetch("/data/map-paths.json").then(
         (r) => r.json() as Promise<{ id: number; path: string }[]>,
       ),
+      fetch("/api/v2-content")
+        .then((r) => r.ok ? r.json() as Promise<{ counties: V2CountyContent[] }> : { counties: [] })
+        .catch(() => ({ counties: [] as V2CountyContent[] })),
     ])
-      .then(([data, map]) => {
+      .then(([data, map, v2]) => {
         const initialView = new URL(location.href).searchParams.get('view');
         if (initialView && Object.hasOwn(viewLabels, initialView)) setView(initialView as View);
         setCounties(data.counties);
         setPaths(map);
+        setV2Counties(v2.counties);
         const ids = (
           new URL(location.href).searchParams.get("counties") || "39149,39011"
         )
@@ -499,12 +538,13 @@ export default function Observatory() {
   const ranked = useMemo(
     () =>
       counties
-        .filter((c) => c.metrics[metric]?.value != null)
+        .filter((c) => (v2MapRankValue(metric, v2ById.get(c.countyid)) ?? c.metrics[metric]?.value) != null)
         .sort(
           (a, b) =>
-            (b.metrics[metric].value ?? 0) - (a.metrics[metric].value ?? 0),
+            ((v2MapRankValue(metric, v2ById.get(b.countyid)) ?? b.metrics[metric]?.value) ?? 0) -
+            ((v2MapRankValue(metric, v2ById.get(a.countyid)) ?? a.metrics[metric]?.value) ?? 0),
         ),
-    [counties, metric],
+    [counties, metric, v2ById],
   );
   const ranks = useMemo(
     () =>
@@ -540,12 +580,22 @@ export default function Observatory() {
     surface: view === 'explore' ? 'map' : view === 'compare' ? 'comparison' : view === 'simulator' ? 'simulator' : 'investigation',
     metric, panel: tab, ...(view === 'simulator' ? {scenario} : {}),
   };
+  const mapValue = (countyid: number | undefined) => {
+    if (countyid == null) return "No data";
+    const current = v2MapValue(metric, v2ById.get(countyid));
+    const currentRow = v2ById.get(countyid);
+    return current == null
+      ? format(metric, byId.get(countyid)?.metrics[metric]?.value)
+      : metric === "potential"
+        ? `${v2Level(currentRow?.qpotential)} · score ${formatV2MapValue(metric, current)}`
+        : `${zScoreLevel(current)} · ${formatV2MapValue(metric, current)}`;
+  };
   return (
     <main className={view === 'home' ? 'observatory home-mode' : 'observatory'}>
       {view !== "home" && <SiteSidebar view={view} metric={metric} dark={dark} navigate={navigate} navigateMap={navigateMap} onTheme={() => setDark(!dark)} onConnect={() => setSettings(true)} />}
       <section className={view === 'home' ? 'obs-main home-main' : 'obs-main'}>
         <div className="obs-content">
-          {view === 'home' && <AdaptHome onExplore={() => navigateMap('potential')} onCompare={() => navigate('compare')} onSimulate={() => navigate('simulator')} />}
+          {view === 'home' && <AdaptHome onExplore={() => navigateMap('potential')} onCompare={() => navigate('compare')} onSimulate={() => navigate('simulator')} onStory={() => navigate('story')} />}
           {view === 'maps' && <MapsPage onMap={navigateMap} />}
           {view === 'tools' && <ToolsPage navigate={navigate} />}
           {view === 'insights' && <InsightsPage />}
@@ -566,6 +616,7 @@ export default function Observatory() {
                   ? metric === 'potential' ? 'ADAPT Index Map' : metric === 'pct_pred_emp_gain' ? 'Tradable Services Job Gains' : 'Manufacturing Trade Exposure'
                   : view === 'compare' ? 'Peer Comparison'
                   : view === 'simulator' ? 'Policy Simulator'
+                  : view === 'employer' ? 'Employer Trade Exposure'
                   : view === 'help' ? 'Make the most of ADAPT.'
                   : view === "sources"
                     ? "Build your evidence base."
@@ -576,6 +627,7 @@ export default function Observatory() {
                   ? metric === 'potential' ? 'ADAPT scores how well counties equip their workers to adapt to trade.' : metric === 'pct_pred_emp_gain' ? 'Estimated job growth from exports of tradable services, 2017–2022.' : 'Change in exposure to manufacturing import competition from low-income countries, 2011–2022.'
                   : view === 'compare' ? 'See how well a county is adapting compared with a peer county that shares a similar economic and demographic profile, or choose your own comparison.'
                   : view === 'simulator' ? 'Choose a county, then move four levers—export exposure, K-12 spending per pupil, downstream trade exposure, and import competition—to see how the ADAPT score and level respond.'
+                  : view === 'employer' ? 'Explore the share of local employment at trade-exposed employers by commuting zone: exports, direct import competition and downstream exposure.'
                   : view === 'help' ? 'A step-by-step guide to counties, conversations, sources and uncertainty.'
                   : view === "sources"
                     ? "Bring sources into the conversation and control what informs your answers."
@@ -588,7 +640,7 @@ export default function Observatory() {
               {error}
             </div>
           )}
-          {['explore','compare','simulator','investigate'].includes(view) && <div className="county-toolbar">
+          {['explore','compare','simulator','investigate','employer'].includes(view) && <div className="county-toolbar">
             <CountySearch counties={counties} onSelect={choose} />
             <div className="county-chips">
               {chosen.map((c, i) => (
@@ -672,10 +724,7 @@ export default function Observatory() {
                         >
                           <title>
                             {byId.get(p.id)?.name}:{" "}
-                            {format(
-                              metric,
-                              byId.get(p.id)?.metrics[metric]?.value,
-                            )}
+                            {mapValue(p.id)}
                           </title>
                         </path>
                       ))}
@@ -684,12 +733,7 @@ export default function Observatory() {
                     {hover && byId.has(hover) && (
                       <div className="map-readout">
                         <strong>{byId.get(hover)!.name}</strong>
-                        <span>
-                          {format(
-                            metric,
-                            byId.get(hover)!.metrics[metric]?.value,
-                          )}
-                        </span>
+                        <span>{mapValue(hover)}</span>
                       </div>
                     )}
                   </div>
@@ -720,10 +764,8 @@ export default function Observatory() {
                     <span>FIPS {home?.countyid}</span>
                   </div>
                   <div className="focus-score">
-                    <span>
-                      {format("potential", home?.metrics.potential?.value)}
-                    </span>
-                    <small>American Dream potential</small>
+                    <span>{mapValue(home?.countyid)}</span>
+                    <small>{metric === "potential" ? "ADAPT index score" : labels[metric]}</small>
                   </div>
                   <div className="focus-stat">
                     <span>Workforce</span>
@@ -755,8 +797,10 @@ export default function Observatory() {
                   >
                     Ask about this county <ArrowUpRight size={16} />
                   </button>
+                  <V2CountyProfile row={v2ById.get(home?.countyid ?? 0)} metric={metric} />
                 </aside>
               </div>}
+              {view === 'explore' && <V2MapContext metric={metric} counties={v2Counties} />}
               <div className="metric-strip">
                 {metrics.slice(1, 5).map((m) => (
                   <div key={m}>
@@ -816,6 +860,7 @@ export default function Observatory() {
               <section className="panel data-panel">
                 {tab === "overview" ? (
                   <>
+                    {view === 'compare' && <V2PeerComparison selected={chosen} v2Counties={v2Counties} />}
                     <h2>A shared view of different outcomes</h2>
                     <p className="muted">
                       All ADAPT measures use their original units. A difference
@@ -907,6 +952,7 @@ export default function Observatory() {
             </>
           )}
           {view === 'help' && <Help onConnect={() => setSettings(true)} />}
+          {view === 'employer' && <EmployerTradeExposure counties={v2Counties} paths={paths} selectedId={home?.countyid} onSelect={choose} />}
           {view === 'simulator' && <>
             <PolicySimulator county={home} />
             <section className="panel scenario-panel scenario-notes">
