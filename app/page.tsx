@@ -259,7 +259,7 @@ function AdaptHome({
       <section className="adapt-hero">
         <div className="hero-grid" aria-hidden="true" />
         <div className="adapt-hero-copy">
-          <h1>Find where workers <span>ADAPT</span></h1>
+          <h1>Find where workers <span>ADAPT</span> to economic change</h1>
           <p className="adapt-acronym"><b>A</b>merican <b>D</b>ream <b>A</b>chievability <b>P</b>rogress <b>T</b>racker</p>
           <div className="hero-actions">
             <button className="gold-action" onClick={onExplore}>Explore ADAPT <ArrowUpRight size={17} /></button>
@@ -542,7 +542,7 @@ export default function Observatory() {
   };
   return (
     <main className={view === 'home' ? 'observatory home-mode' : 'observatory'}>
-      <SiteSidebar view={view} metric={metric} dark={dark} navigate={navigate} navigateMap={navigateMap} onTheme={() => setDark(!dark)} onConnect={() => setSettings(true)} />
+      {view !== "home" && <SiteSidebar view={view} metric={metric} dark={dark} navigate={navigate} navigateMap={navigateMap} onTheme={() => setDark(!dark)} onConnect={() => setSettings(true)} />}
       <section className={view === 'home' ? 'obs-main home-main' : 'obs-main'}>
         <div className="obs-content">
           {view === 'home' && <AdaptHome onExplore={() => navigateMap('potential')} onCompare={() => navigate('compare')} onSimulate={() => navigate('simulator')} />}

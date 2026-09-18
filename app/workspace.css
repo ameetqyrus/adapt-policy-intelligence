@@ -357,7 +357,8 @@ html[data-theme=dark] .mini-map { filter:brightness(1.25); }
 .v2-left-nav nav button.observatory-link.active { color:#fff; }
 .v2-left-nav .nav-bottom { margin-top:18px; padding:14px 10px 2px; border-top:1px solid rgba(255,255,255,.1); }
 .v2-left-nav .settings-link { width:100%; }
-.obs-main,.home-main { margin-left:264px; }
+.obs-main { margin-left:264px; }
+.home-main { margin-left:0; }
 .home-main .obs-content { max-width:none; padding:0; }
 
 @media(max-width:950px) {
