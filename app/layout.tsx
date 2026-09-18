@@ -7,18 +7,18 @@ const dmSans = Libre_Franklin({ variable: '--font-dm-sans', subsets: ['latin'] }
 const lora = Source_Serif_4({ variable: '--font-lora', subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://adapt-observatory.amitonquest.chatgpt.site'),
+  metadataBase: new URL('https://adapt-unified-observatory.amitonquest.chatgpt.site'),
   title: 'ADAPT — American Dream Achievability Progress Tracker',
-  description: 'Explore county outcomes, compare peers and investigate how policy and global change shape the American Dream.',
+  description: 'The American Dream Achievability Progress Tracker measures county-level economic opportunity for the 60% of American workers without a four-year degree.',
   openGraph: {
     title: 'ADAPT — Dashboard & Observatory',
-    description: 'County maps, peer comparison and evidence-led policy investigation in one ADAPT workspace.',
+    description: 'Explore where workers thrive, compare places and examine the evidence behind local outcomes.',
     images: [{ url: '/og.png', width: 1200, height: 630, alt: 'AdapT — Policy intelligence, grounded in evidence' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'ADAPT Observatory',
-    description: 'County comparison and AI impact scenario planning, grounded in ADAPT and official evidence.',
+    description: 'Explore where workers thrive, compare places and examine the evidence behind local outcomes.',
     images: ['/og.png'],
   },
 };

@@ -3,15 +3,11 @@ import { useEffect, useMemo, useState } from "react";
 import {
   ArrowUpRight,
   BookOpen,
-  Building2,
-  ChartNoAxesCombined,
   ChevronDown,
-  Compass,
-  Handshake,
-  Map as MapIcon,
+  ChevronRight,
+  Menu,
   MessageSquare,
   Moon,
-  Home as HomeIcon,
   RotateCcw,
   Search,
   Settings,
@@ -41,39 +37,153 @@ import Help from './components/Help';
 import Policies from './components/Policies';
 import PolicySimulator from './components/PolicySimulator';
 import type { WorkspaceContext } from '@/lib/workspace-context';
-type View = "home" | "explore" | "compare" | "simulator" | "investigate" | "sources" | "story" | "research" | "support" | "help";
+type View = "home" | "maps" | "explore" | "tools" | "compare" | "simulator" | "investigate" | "observatory" | "sources" | "insights" | "story" | "faculty" | "team" | "research" | "support" | "contact" | "help";
 const colors = ["#164d72", "#4a7799", "#83a5bd", "#bfd3df", "#e5edf1"];
+
+const viewLabels: Record<View, string> = {
+  home: "Home",
+  maps: "All maps",
+  explore: "Maps",
+  tools: "All tools",
+  compare: "Peer Comparison",
+  simulator: "Policy Simulator",
+  investigate: "ADAPT Policy Intelligence",
+  observatory: "Observatory",
+  sources: "Evidence Library",
+  insights: "Insights",
+  story: "Our Story",
+  faculty: "Faculty leadership",
+  team: "ADAPT core team",
+  research: "Research Outputs",
+  support: "Partner with us",
+  contact: "Contact",
+  help: "Help",
+};
+
+function SiteHeader({
+  view,
+  dark,
+  navigate,
+  navigateMap,
+  onTheme,
+  onConnect,
+}: {
+  view: View;
+  dark: boolean;
+  navigate: (view: View) => void;
+  navigateMap: (metric: string) => void;
+  onTheme: () => void;
+  onConnect: () => void;
+}) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const go = (next: View) => {
+    setMenuOpen(false);
+    navigate(next);
+  };
+  const goMap = (next: string) => {
+    setMenuOpen(false);
+    navigateMap(next);
+  };
+  return <>
+    <header className="v2-site-header">
+      <button className="v2-logo" onClick={() => go('home')} aria-label="ADAPT home">
+        <span className="brand-mark">A<span /></span>
+        <span><b>ADAPT</b><small>AMERICAN DREAM TRACKER</small></span>
+      </button>
+      <nav className="v2-desktop-nav" aria-label="Primary navigation">
+        <button className={view === 'home' ? 'current' : ''} onClick={() => go('home')}>Home</button>
+        <details><summary>Maps <ChevronDown size={14}/></summary><div className="v2-dropdown">
+          <button onClick={() => go('maps')}>All maps</button>
+          <button onClick={() => goMap('potential')}>ADAPT Index map</button>
+          <button onClick={() => goMap('pct_pred_emp_gain')}>Services job gains map</button>
+          <button onClick={() => goMap('pct_pred_emp_loss')}>Manufacturing trade map</button>
+        </div></details>
+        <details><summary>Tools <ChevronDown size={14}/></summary><div className="v2-dropdown">
+          <button onClick={() => go('tools')}>All tools</button>
+          <button onClick={() => go('investigate')}>Policy Intelligence</button>
+          <button onClick={() => go('compare')}>Peer Comparison</button>
+          <button onClick={() => go('simulator')}>Policy Simulator</button>
+        </div></details>
+        <button className={view === 'insights' ? 'current' : ''} onClick={() => go('insights')}>Insights</button>
+        <button className={view === 'story' ? 'current' : ''} onClick={() => go('story')}>Our Story</button>
+        <details><summary>Our Team <ChevronDown size={14}/></summary><div className="v2-dropdown">
+          <button onClick={() => go('faculty')}>Faculty leadership</button>
+          <button onClick={() => go('team')}>ADAPT core team</button>
+        </div></details>
+        <button className={view === 'research' ? 'current' : ''} onClick={() => go('research')}>Our Research</button>
+        <button className={view === 'support' ? 'current' : ''} onClick={() => go('support')}>Partner with us</button>
+      </nav>
+      <div className="v2-header-actions">
+        <button className="observatory-button" onClick={() => go('observatory')}>Observatory</button>
+        <button className="icon-btn" aria-label="AI connection" onClick={onConnect}><Settings size={17}/></button>
+        <button className="icon-btn" aria-label={dark ? 'Use light appearance' : 'Use dark appearance'} onClick={onTheme}>{dark ? <Sun size={17}/> : <Moon size={17}/>}</button>
+        <button className="v2-menu-button" aria-label="Open menu" onClick={() => setMenuOpen(true)}><Menu size={21}/></button>
+      </div>
+    </header>
+    {menuOpen && <div className="v2-menu-backdrop" role="presentation" onMouseDown={() => setMenuOpen(false)}>
+      <aside className="v2-menu" role="dialog" aria-modal="true" aria-label="Menu" onMouseDown={(event) => event.stopPropagation()}>
+        <header><h2>Menu</h2><button aria-label="Close menu" onClick={() => setMenuOpen(false)}><X size={22}/></button></header>
+        <nav>
+          <button onClick={() => go('home')}>Home</button>
+          <button onClick={() => go('insights')}>Insights</button>
+          <button onClick={() => go('story')}>Our Story</button>
+          <p>MAPS</p>
+          <button onClick={() => go('maps')}>All maps</button>
+          <button onClick={() => goMap('potential')}>ADAPT Index map</button>
+          <button onClick={() => goMap('pct_pred_emp_gain')}>Services job gains map</button>
+          <button onClick={() => goMap('pct_pred_emp_loss')}>Manufacturing trade map</button>
+          <p>TOOLS</p>
+          <button onClick={() => go('tools')}>All tools</button>
+          <button onClick={() => go('investigate')}>Policy Intelligence</button>
+          <button onClick={() => go('compare')}>Peer Comparison</button>
+          <button onClick={() => go('simulator')}>Policy Simulator</button>
+          <p>OUR TEAM</p>
+          <button onClick={() => go('faculty')}>Faculty leadership</button>
+          <button onClick={() => go('team')}>ADAPT core team</button>
+          <p>OUR RESEARCH</p>
+          <button onClick={() => go('research')}>Research Outputs</button>
+          <button onClick={() => go('support')}>Partner with us</button>
+          <p>OBSERVATORY</p>
+          <button onClick={() => go('observatory')}>Observatory overview</button>
+          <button onClick={() => go('investigate')}>Investigations</button>
+          <button onClick={() => go('sources')}>Evidence Library</button>
+          <button onClick={() => go('help')}>Help & how to use</button>
+        </nav>
+      </aside>
+    </div>}
+  </>;
+}
 
 function AdaptHome({
   onExplore,
   onCompare,
-  onInvestigate,
+  onSimulate,
 }: {
   onExplore: () => void;
   onCompare: () => void;
-  onInvestigate: () => void;
+  onSimulate: () => void;
 }) {
   const features = [
     {
       number: "01",
-      title: "Where workers are adapting",
-      body: "See manufacturing trade loss and tradable-services job gains for every county on one national view.",
+      title: "Where Workers Are Adapting",
+      body: "See manufacturing trade loss and tradable services job gains for every county, shaded on a single national view.",
       action: "Explore the ADAPT map",
       onClick: onExplore,
     },
     {
       number: "02",
-      title: "Peer county comparison",
-      body: "Compare counties with similar starting conditions, then investigate why their outcomes may have diverged.",
+      title: "Peer County Comparison",
+      body: "See how well your county is adapting compared to peer counties with a similar economic and demographic profile (or choose your own comparison).",
       action: "Compare counties",
       onClick: onCompare,
     },
     {
       number: "03",
-      title: "Evidence-led investigation",
-      body: "Ask open questions about policy, trade and technological change, grounded in ADAPT data and sources you control.",
-      action: "Start an investigation",
-      onClick: onInvestigate,
+      title: "Policy What-If Simulator",
+      body: "Move one lever, such as K-12 education spending, and watch a county's projected index and ranking respond.",
+      action: "Run a scenario",
+      onClick: onSimulate,
     },
   ];
   return (
@@ -81,29 +191,25 @@ function AdaptHome({
       <section className="adapt-hero">
         <div className="hero-grid" aria-hidden="true" />
         <div className="adapt-hero-copy">
-          <p className="eyebrow">GEORGETOWN UNIVERSITY · LAB FOR GLOBALIZATION AND SHARED PROSPERITY</p>
           <h1>Find where workers <span>ADAPT</span></h1>
           <p className="adapt-acronym"><b>A</b>merican <b>D</b>ream <b>A</b>chievability <b>P</b>rogress <b>T</b>racker</p>
-          <p className="adapt-hero-lede">County-level evidence for understanding how trade, policy and global change shape economic opportunity for workers without a four-year degree.</p>
           <div className="hero-actions">
             <button className="gold-action" onClick={onExplore}>Explore ADAPT <ArrowUpRight size={17} /></button>
-            <button className="hero-secondary" onClick={onInvestigate}>Open Observatory</button>
           </div>
         </div>
       </section>
       <dl className="adapt-stats">
-        <div><dt>3,145</dt><dd>counties tracked</dd></div>
         <div><dt>3 decades</dt><dd>of economic data</dd></div>
         <div><dt>Every 3 years</dt><dd>index refresh</dd></div>
       </dl>
       <section className="adapt-purpose">
         <p className="eyebrow">WHAT ADAPT DOES</p>
-        <div className="purpose-grid">
-          <h2>Turn a national story into local questions that can be investigated.</h2>
+        <div className="purpose-grid v2-purpose-grid">
+          <span className="gold-rule-wide" aria-hidden="true" />
           <ol>
             <li><span>1</span>Identifies where workers are adapting</li>
-            <li><span>2</span>Shows why some communities succeed while comparable places fall behind</li>
-            <li><span>3</span>Connects outcomes to practical policy evidence without claiming causation</li>
+            <li><span>2</span>Identifies why some workers and communities are succeeding while peer communities fall behind</li>
+            <li><span>3</span>Identifies what practical actions actually generate upward mobility</li>
           </ol>
         </div>
       </section>
@@ -134,7 +240,7 @@ function StoryPage() {
   return <div className="public-page">
     <header><p className="eyebrow">OUR STORY</p><h1>A lab dedicated to including workers in economic progress</h1></header>
     <div className="story-grid">{blocks.map(([title, body]) => <section className="panel" key={title}><p className="eyebrow">{title}</p><p>{body}</p></section>)}</div>
-    <section className="panel story-wide"><p className="eyebrow">WHERE ADAPT FITS</p><h2>Measurement that helps communities ask better questions</h2><p>The Lab&apos;s first major initiative created the American Dream Achievability Progress Tracker, which compares how cities and counties leverage globalization to improve the lives of workers without a four-year degree. ADAPT captures how local fiscal policy, especially investments in K-12 and vocational education, relates to upward mobility in the wake of trade shocks.</p><p>Observatory extends that work into an evidence workspace: compare peers, examine sources, test alternative explanations and preserve the uncertainty around causal claims.</p></section>
+    <section className="panel story-wide"><p className="eyebrow">WHERE ADAPT FITS</p><h2>Measurement that helps communities ask better questions</h2><p>The Lab&apos;s first major initiative created the American Dream Achievability Progress Tracker (ADAPT), which ranks cities and counties based on their ability to leverage globalization to improve the lives of the median voter. ADAPT captures how local fiscal policies, particularly investments in K-12 and vocational education, have supported local economies and promoted upward mobility (or not) for non-college educated workers, specifically in the wake of trade shocks. Ultimately, the Lab hopes to expand ADAPT into a Global Index for Shared Prosperity.</p><p>In tandem with ADAPT, the Lab also produces focused research on the relationship between globalization and labor, social investment, gender, race, and climate.</p></section>
   </div>;
 }
 
@@ -148,7 +254,45 @@ function ResearchPage() {
 }
 
 function SupportPage() {
-  return <div className="public-page"><header><p className="eyebrow">PARTNER WITH US</p><h1>The answer to economic disruption is not retreat; it is evidence.</h1><p>We are seeking partners who share that conviction: funders, institutions and practitioners willing to back rigorous, county-level measurement of who the economy is actually working for.</p></header><div className="story-grid"><section className="panel story-wide"><h2>Why partner with the Lab</h2><p>Support funds the data infrastructure behind ADAPT: index refreshes across 3,145 counties, peer matching, investigation tooling and the case studies that turn measurement into usable local policy guidance.</p></section><aside className="panel"><p className="eyebrow">CONTACT</p><p>Lab for Globalization and Shared Prosperity<br/>Georgetown University<br/>37th and O Streets NW<br/>Washington, DC 20057</p></aside></div></div>;
+  const supporters = ["Georgetown University", "Institute for Humane Studies at George Mason University", "Bipartisan Policy Center", "Hinrich Foundation", "American Political Science Association"];
+  return <div className="public-page"><header><p className="eyebrow">PARTNER WITH US</p><h1>The answer to economic disruption is not retreat; it is evidence.</h1><p>We are seeking partners who share that conviction: funders, institutions and practitioners willing to back rigorous, county-level measurement of who the economy is actually working for.</p></header><div className="story-grid"><section className="panel story-wide"><h2>Why partner with the Lab</h2><p>Support funds the data infrastructure behind ADAPT: annual index refreshes across all 3,145 counties, peer-matching and simulation tooling, and the case studies that turn measurement into usable local policy guidance. It also funds the graduate researchers who do the work.</p><p>Partnerships range from underwriting a research cycle to sponsoring a regional deep dive. We are glad to scope something specific with you.</p></section><aside className="panel"><p className="eyebrow">CONTACT</p><p>Lab for Globalization and Shared Prosperity<br/>Georgetown University<br/>37th and O Streets NW<br/>Washington, DC 20057</p></aside></div><section className="partner-section"><h2>Our donors and partners</h2><span className="gold-rule-wide"/><p>The Lab&apos;s work would not be possible without the support of our donors and partners, who span the governmental, business, and philanthropic spaces.</p><ul>{supporters.map((supporter) => <li key={supporter}>{supporter}</li>)}</ul></section></div>;
+}
+
+function MapsPage({ onMap }: { onMap: (metric: string) => void }) {
+  const cards = [
+    ["ADAPT", "ADAPT Index Map", "ADAPT scores how well counties equip their workers to adapt to trade.", "potential"],
+    ["Services", "Tradable Services Job Gains", "Estimated job growth from exports of tradable services, 2017–2022.", "pct_pred_emp_gain"],
+    ["Trade", "Manufacturing Trade Exposure", "Change in exposure to manufacturing import competition from low-income countries, 2011–2022.", "pct_pred_emp_loss"],
+  ];
+  return <div className="public-page v2-index-page"><header><p className="eyebrow">MAPS</p><h1>Three views of how counties are adapting</h1><p>Start with the ADAPT Index, then look underneath it at the forces that move it: services export growth and manufacturing import competition.</p></header><section><h2>County maps</h2><span className="gold-rule-wide"/><p className="muted">County-level ADAPT measures, built from the 2022 vintage of the index.</p><div className="v2-card-grid">{cards.map(([name, title, body, metric]) => <button className="v2-route-card" onClick={() => onMap(metric)} key={metric}><span className="route-preview"><span className="mini-map" aria-hidden="true"/></span><small>{title}</small><h3>{name}</h3><p>{body}</p><strong>Open map <ChevronRight size={16}/></strong></button>)}</div></section></div>;
+}
+
+function ToolsPage({ navigate }: { navigate: (view: View) => void }) {
+  const tools: Array<[string,string,string,View,React.ReactNode]> = [
+    ["Policy Intelligence", "Ask grounded questions about a county pair", "Compare a county with its ADAPT-computed peer, then ask a question. Model facts, policy context and every cited source are kept separate.", "investigate", <MessageSquare key="policy" size={23}/>],
+    ["Peer Comparison", "Compare a county with its peers", "See how well a county is adapting next to an auto-suggested peer, or choose your own comparison, with the evidence visible beside the answer.", "compare", <Users key="peer" size={23}/>],
+    ["Policy Simulator", "Test a county policy scenario", "Move the four published V2 levers and discuss what changed, what the model assumes and what the result cannot establish.", "simulator", <SlidersHorizontal key="simulator" size={23}/>],
+  ];
+  return <div className="public-page v2-index-page"><header><p className="eyebrow">TOOLS</p><h1>Put the ADAPT data to work</h1><p>Interactive tools built on the ADAPT dataset: policy intelligence, peer county comparison, and a policy simulator for scenario testing. Each tool includes a grounded conversation at the bottom.</p></header><div className="v2-card-grid">{tools.map(([name, title, body, target, icon]) => <button className="v2-route-card tool-card" onClick={() => navigate(target)} key={name}><span className="tool-icon">{icon}</span><h3>{name}</h3><small>{title}</small><p>{body}</p><strong>Open tool <ChevronRight size={16}/></strong></button>)}</div></div>;
+}
+
+function InsightsPage() {
+  return <div className="public-page"><header><p className="eyebrow">INSIGHTS</p><h1>Case studies from successful counties.</h1><p>Short, sourced write-ups tied to individual counties: what changed, what the local policy lever was, and what the ADAPT numbers did afterwards.</p></header><section className="panel empty-v2"><BookOpen size={26}/><h2>No case studies published yet</h2><p>Published county case studies will appear here. Institutional papers and press live separately under Our Research.</p></section></div>;
+}
+
+function TeamPage({ faculty = false }: { faculty?: boolean }) {
+  const names = faculty
+    ? ["Niccolò Bonifai", "Rodney D. Ludema", "J. Bradford Jensen", "Nita Rudra"]
+    : ["Amelia Tarno", "Joshua Anumolu", "Daisy O'Brien", "Niccolò Bonifai", "Nita Rudra"];
+  return <div className="public-page"><header><p className="eyebrow">OUR TEAM</p><h1>{faculty ? "Faculty leadership" : "ADAPT core team"}</h1><p>{faculty ? "The Lab is composed of scholars who span economics, government, mathematics, foreign service, history, and public policy." : "The Lab engages Georgetown undergraduate and graduate students to contribute to our research and work closely with affiliate faculty."}</p></header><div className="team-grid">{names.map((name) => <article className="panel team-card" key={name}><span aria-hidden="true">{name.split(/\s+/).map((part) => part[0]).join('').slice(0,2)}</span><h2>{name}</h2><p>{faculty ? "Faculty leadership" : "ADAPT core team"}</p></article>)}</div></div>;
+}
+
+function ContactPage() {
+  return <div className="public-page"><header><p className="eyebrow">CONTACT</p><h1>Get in touch with the Lab.</h1><p>Questions about the ADAPT index, requests for data, or interest in partnering on research.</p></header><div className="contact-grid"><section className="panel"><p className="eyebrow">MAILING ADDRESS</p><p>Lab for Globalization and Shared Prosperity<br/>Georgetown University<br/>37th and O Streets NW<br/>Washington, DC 20057</p></section><section><h2>Partnership and press</h2><span className="gold-rule-wide"/><p>For partnership enquiries, see Partner with us.</p><p className="muted">A direct contact email and enquiry form will be added once confirmed by the Lab.</p></section></div></div>;
+}
+
+function ObservatoryPage({ navigate }: { navigate: (view: View) => void }) {
+  return <div className="public-page observatory-landing"><header><p className="eyebrow">OBSERVATORY</p><h1>Investigate the question behind the number.</h1><p>Continue from an ADAPT map, comparison or scenario into a sourced conversation. Add evidence, test alternative explanations and keep uncertainty visible.</p></header><div className="v2-card-grid"><button className="v2-route-card tool-card" onClick={() => navigate('investigate')}><span className="tool-icon"><Telescope size={23}/></span><h3>Investigations</h3><p>Ask follow-up questions across counties, policies, global shocks and future scenarios.</p><strong>Open investigations <ChevronRight size={16}/></strong></button><button className="v2-route-card tool-card" onClick={() => navigate('sources')}><span className="tool-icon"><BookOpen size={23}/></span><h3>Evidence Library</h3><p>Upload documents and add websites so new evidence can change the next answer.</p><strong>Manage evidence <ChevronRight size={16}/></strong></button><button className="v2-route-card tool-card" onClick={() => navigate('help')}><span className="tool-icon"><HelpCircle size={23}/></span><h3>Help & method</h3><p>Understand how questions, county data, added sources and model responses fit together.</p><strong>Read the guide <ChevronRight size={16}/></strong></button></div></div>;
 }
 function CountySearch({
   counties,
@@ -247,7 +391,7 @@ export default function Observatory() {
     ])
       .then(([data, map]) => {
         const initialView = new URL(location.href).searchParams.get('view');
-        if (initialView && ['home','explore','compare','simulator','investigate','sources','story','research','support','help'].includes(initialView)) setView(initialView as View);
+        if (initialView && Object.hasOwn(viewLabels, initialView)) setView(initialView as View);
         setCounties(data.counties);
         setPaths(map);
         const ids = (
@@ -261,7 +405,8 @@ export default function Observatory() {
       .catch(() =>
         setError("County data could not load. Reload to try again."),
       );
-    setDark(localStorage.getItem("adapt-observatory-theme") === "dark");
+    const savedDarkMode = localStorage.getItem("adapt-observatory-theme") === "dark";
+    if (savedDarkMode) queueMicrotask(() => setDark(true));
   }, []);
   useEffect(() => {
     document.documentElement.dataset.theme = dark ? "dark" : "light";
@@ -327,149 +472,55 @@ export default function Observatory() {
     surface: view === 'explore' ? 'map' : view === 'compare' ? 'comparison' : view === 'simulator' ? 'simulator' : 'investigation',
     metric, panel: tab, ...(view === 'simulator' ? {scenario} : {}),
   };
-  const askHere = () => document.getElementById('evidence-companion')?.scrollIntoView({behavior:'smooth',block:'start'});
   return (
     <main className={view === 'home' ? 'observatory home-mode' : 'observatory'}>
-      {view !== 'home' && <aside className="obs-nav">
-        <button className="obs-brand" onClick={() => navigate('home')}>
-          <span className="brand-mark">
-            A<span />
-          </span>
-          <div>
-            ADAPT<small>AMERICAN DREAM TRACKER</small>
-          </div>
-        </button>
-        <nav aria-label="Main navigation">
-          <div className="nav-caption">DASHBOARD</div>
-          <button className={view === 'home' ? 'active' : ''} onClick={() => navigate('home')}><HomeIcon size={18}/>Home{view === 'home' && <span className="nav-line"/>}</button>
-          <div className="nav-caption nav-section">MAPS</div>
-          <button className={view === 'explore' && metric === 'potential' ? 'active' : ''} onClick={() => navigateMap('potential')}><MapIcon size={18}/>ADAPT Index{view === 'explore' && metric === 'potential' && <span className="nav-line"/>}</button>
-          <button className={view === 'explore' && metric === 'pct_pred_emp_gain' ? 'active' : ''} onClick={() => navigateMap('pct_pred_emp_gain')}><ChartNoAxesCombined size={18}/>Services job gains{view === 'explore' && metric === 'pct_pred_emp_gain' && <span className="nav-line"/>}</button>
-          <button className={view === 'explore' && metric === 'pct_pred_emp_loss' ? 'active' : ''} onClick={() => navigateMap('pct_pred_emp_loss')}><Building2 size={18}/>Manufacturing trade{view === 'explore' && metric === 'pct_pred_emp_loss' && <span className="nav-line"/>}</button>
-          <div className="nav-caption nav-section">TOOLS</div>
-          <button className={view === 'compare' ? 'active' : ''} onClick={() => navigate('compare')}><Users size={18}/>Peer comparison{view === 'compare' && <span className="nav-line"/>}</button>
-          <button className={view === 'simulator' ? 'active' : ''} onClick={() => navigate('simulator')}><SlidersHorizontal size={18}/>Policy simulator{view === 'simulator' && <span className="nav-line"/>}</button>
-          <div className="nav-caption nav-section">OBSERVATORY</div>
-          <button className={view === 'investigate' ? 'active observatory-link' : 'observatory-link'} onClick={() => navigate('investigate')}><Telescope size={18}/>Investigations{view === 'investigate' && <span className="nav-line"/>}</button>
-          <button className={view === 'sources' ? 'active' : ''} onClick={() => navigate('sources')}><BookOpen size={18}/>Evidence library{view === 'sources' && <span className="nav-line"/>}</button>
-          <div className="nav-caption nav-section">ABOUT</div>
-          <button className={view === 'story' ? 'active' : ''} onClick={() => navigate('story')}><Compass size={18}/>Our story{view === 'story' && <span className="nav-line"/>}</button>
-          <button className={view === 'research' ? 'active' : ''} onClick={() => navigate('research')}><BookOpen size={18}/>Our research{view === 'research' && <span className="nav-line"/>}</button>
-          <button className={view === 'support' ? 'active' : ''} onClick={() => navigate('support')}><Handshake size={18}/>Partner with us{view === 'support' && <span className="nav-line"/>}</button>
-          <button className={view === 'help' ? 'active' : ''} onClick={() => navigate('help')}><HelpCircle size={18}/>Help{view === 'help' && <span className="nav-line"/>}</button>
-        </nav>
-        <div className="nav-bottom">
-          <div className="nav-note">
-            <span className="gold-rule" />
-            <strong>
-              Local outcomes.
-              <br />A wider perspective.
-            </strong>
-            <p>
-              Follow the connections between places, policies and opportunity.
-            </p>
-          </div>
-          <button className="settings-link" onClick={() => setSettings(true)}>
-            <Settings size={18} />
-            AI connection
-          </button>
-          <button className="settings-link" onClick={() => setDark(!dark)}>
-            {dark ? <Sun size={18} /> : <Moon size={18} />}{" "}
-            {dark ? "Light appearance" : "Dark appearance"}
-          </button>
-        </div>
-      </aside>}
+      <SiteHeader view={view} dark={dark} navigate={navigate} navigateMap={navigateMap} onTheme={() => setDark(!dark)} onConnect={() => setSettings(true)} />
       <section className={view === 'home' ? 'obs-main home-main' : 'obs-main'}>
-        {view === 'home' ? <header className="home-topbar">
-          <button className="home-brand" onClick={() => window.scrollTo({top:0,behavior:'smooth'})}>
-            <span className="brand-mark">A<span /></span>
-            <span><b>ADAPT</b><small>AMERICAN DREAM TRACKER</small></span>
-          </button>
-          <nav aria-label="Homepage navigation">
-            <button onClick={() => navigateMap('potential')}>Explore map</button>
-            <button onClick={() => navigate('compare')}>Compare</button>
-            <button onClick={() => navigate('research')}>Research</button>
-            <button className="home-observatory" onClick={() => navigate('investigate')}>Open Observatory</button>
-            <button className="icon-btn" aria-label={dark ? 'Use light appearance' : 'Use dark appearance'} onClick={() => setDark(!dark)}>{dark ? <Sun size={16}/> : <Moon size={16}/>}</button>
-          </nav>
-        </header> : <header className="obs-top">
-          <div className="breadcrumb">
-            ADAPT <span>/</span>{" "}
-            {view === "home"
-              ? "Home"
-              : view === "explore"
-              ? "Policy intelligence"
-              : view === 'compare' ? 'Peer comparison'
-              : view === 'simulator' ? 'Policy simulator'
-              : view === 'help' ? 'Help & how to use'
-              : view === 'story' ? 'Our story'
-              : view === 'research' ? 'Our research'
-              : view === 'support' ? 'Partner with us'
-              : view === "sources"
-                ? "Evidence library"
-                : "Observatory · Investigations"}
-          </div>
-          <button className="mobile-settings" onClick={() => setSettings(true)}>
-            <Settings size={16} />
-            AI connection
-          </button>
-          <span className="private-label">American Dream Achievability Progress Tracker</span>
-          <button
-            className="icon-btn mobile-theme"
-            aria-label="Toggle appearance"
-            onClick={() => setDark(!dark)}
-          >
-            {dark ? <Sun size={16} /> : <Moon size={16} />}
-          </button>
-        </header>}
         <div className="obs-content">
-          {view === 'home' && <AdaptHome onExplore={() => navigateMap('potential')} onCompare={() => navigate('compare')} onInvestigate={() => navigate('investigate')} />}
+          {view === 'home' && <AdaptHome onExplore={() => navigateMap('potential')} onCompare={() => navigate('compare')} onSimulate={() => navigate('simulator')} />}
+          {view === 'maps' && <MapsPage onMap={navigateMap} />}
+          {view === 'tools' && <ToolsPage navigate={navigate} />}
+          {view === 'insights' && <InsightsPage />}
           {view === 'story' && <StoryPage />}
+          {view === 'faculty' && <TeamPage faculty />}
+          {view === 'team' && <TeamPage />}
           {view === 'research' && <ResearchPage />}
           {view === 'support' && <SupportPage />}
-          {!['home','story','research','support'].includes(view) && <div className="page-heading">
+          {view === 'contact' && <ContactPage />}
+          {view === 'observatory' && <ObservatoryPage navigate={navigate} />}
+          {!['home','maps','tools','insights','story','faculty','team','research','support','contact','observatory'].includes(view) && <div className="page-heading">
             <div>
               <p className="eyebrow">
                 AMERICAN DREAM ACHIEVABILITY PROGRESS TRACKER
               </p>
               <h1>
                 {view === "explore"
-                  ? "Opportunity has a geography."
-                  : view === 'compare' ? 'Learn from the evidence.'
-                  : view === 'simulator' ? 'Explore what could change.'
+                  ? metric === 'potential' ? 'ADAPT Index Map' : metric === 'pct_pred_emp_gain' ? 'Tradable Services Job Gains' : 'Manufacturing Trade Exposure'
+                  : view === 'compare' ? 'Peer Comparison'
+                  : view === 'simulator' ? 'Policy Simulator'
                   : view === 'help' ? 'Make the most of ADAPT.'
                   : view === "sources"
                     ? "Build your evidence base."
-                    : "Follow the question."}
+                    : "ADAPT Policy Intelligence"}
               </h1>
               <p>
                 {view === "explore"
-                  ? "Explore where workers thrive. Compare places and examine the evidence behind local outcomes."
-                  : view === 'compare' ? 'Compare descriptive outcomes and documented peer policies. Draw your own conclusions.'
-                  : view === 'simulator' ? 'Discuss explicit assumptions and results without confusing scenarios with predictions.'
+                  ? metric === 'potential' ? 'ADAPT scores how well counties equip their workers to adapt to trade.' : metric === 'pct_pred_emp_gain' ? 'Estimated job growth from exports of tradable services, 2017–2022.' : 'Change in exposure to manufacturing import competition from low-income countries, 2011–2022.'
+                  : view === 'compare' ? 'See how well a county is adapting compared with a peer county that shares a similar economic and demographic profile, or choose your own comparison.'
+                  : view === 'simulator' ? 'Choose a county, then move four levers—export exposure, K-12 spending per pupil, downstream trade exposure, and import competition—to see how the ADAPT score and level respond.'
                   : view === 'help' ? 'A step-by-step guide to counties, conversations, sources and uncertainty.'
                   : view === "sources"
                     ? "Bring sources into the conversation and control what informs your answers."
-                    : "An open conversation about policies, global change and local outcomes."}
+                    : "County comparisons grounded in ADAPT data and the public or uploaded sources you choose."}
               </p>
             </div>
-            {view === "explore" && (
-              <button
-                className="primary"
-                onClick={askHere}
-              >
-                <MessageSquare size={17} />
-                Ask about this view
-                <ArrowUpRight size={16} />
-              </button>
-            )}
           </div>}
           {error && (
             <div className="error-banner" role="alert">
               {error}
             </div>
           )}
-          {['explore','compare','simulator','investigate','sources'].includes(view) && <div className="county-toolbar">
+          {['explore','compare','simulator','investigate'].includes(view) && <div className="county-toolbar">
             <CountySearch counties={counties} onSelect={choose} />
             <div className="county-chips">
               {chosen.map((c, i) => (
@@ -632,7 +683,7 @@ export default function Observatory() {
                   )}
                   <button
                     className="text-action"
-                    onClick={askHere}
+                    onClick={() => navigate('investigate')}
                   >
                     Ask about this county <ArrowUpRight size={16} />
                   </button>
@@ -796,7 +847,7 @@ export default function Observatory() {
             <label>Observations / notes · optional<textarea maxLength={3000} value={scenario.output} onChange={e=>setScenario({...scenario,output:e.target.value})} placeholder="Record what changed, with units and the model/version." /></label>
             <p className="muted">Notes are user-provided and sent with your next question. The assistant must distinguish them from the V2 model and must not manufacture results.</p>
           </section></>}
-          <div id="evidence-companion" hidden={!['explore','compare','simulator','investigate'].includes(view)}>
+          <div id="evidence-companion" hidden={!['compare','simulator','investigate'].includes(view)}>
             <Investigations
               counties={chosen}
               connection={connection}
@@ -813,18 +864,12 @@ export default function Observatory() {
             />
           </div>
           <WebTools counties={counties} onSelect={changeCounties} />
-          <footer className="workspace-footer">
-            <span>ADAPT · Georgetown University Lab for Globalization and Shared Prosperity</span>
-            <a
-              href="https://github.com/cgsp-georgetown/V2_ADAPT_Dashboard"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Research data & methodology <ArrowUpRight size={13} />
-            </a>
-          </footer>
         </div>
       </section>
+      <footer className="v2-site-footer">
+        <div><section><h2>American Dream Achievability Progress Tracker</h2><p>A research project of the Georgetown University Lab for Globalization and Shared Prosperity, tracking county-level economic opportunity for workers without a four-year degree.</p></section><address><strong>Lab for Globalization and Shared Prosperity</strong><br/>Georgetown University<br/>37th and O Streets NW<br/>Washington, DC 20057</address></div>
+        <p>© {new Date().getFullYear()} Georgetown University Lab for Globalization and Shared Prosperity.</p>
+      </footer>
       {settings && (
         <ConnectionDialog
           connection={connection}
