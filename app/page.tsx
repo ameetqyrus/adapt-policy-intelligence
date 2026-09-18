@@ -88,7 +88,7 @@ function SiteHeader({
     <header className="v2-site-header">
       <button className="v2-logo" onClick={() => go('home')} aria-label="ADAPT home">
         <span className="brand-mark">A<span /></span>
-        <span><b>ADAPT</b><small>AMERICAN DREAM TRACKER</small></span>
+        <span><b>ADAPT</b><small>AMERICAN DREAM ACHIEVABILITY PROGRESS TRACKER</small></span>
       </button>
       <nav className="v2-desktop-nav" aria-label="Primary navigation">
         <button className={view === 'home' ? 'current' : ''} onClick={() => go('home')}>Home</button>
@@ -199,8 +199,8 @@ function AdaptHome({
         </div>
       </section>
       <dl className="adapt-stats">
-        <div><dt>3 decades</dt><dd>of economic data</dd></div>
-        <div><dt>Every 3 years</dt><dd>index refresh</dd></div>
+        <div><dt>3</dt><dd>decades of data</dd></div>
+        <div><dt>every 3 years</dt><dd>index refresh</dd></div>
       </dl>
       <section className="adapt-purpose">
         <p className="eyebrow">WHAT ADAPT DOES</p>
