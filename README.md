@@ -1,5 +1,44 @@
 # ADAPT Policy Intelligence
 
+## Unified V2 dashboard + Observatory build
+
+The `feature/v2-adapt-observatory` branch is a separate, comparison-safe build that brings the current Georgetown V2 ADAPT experience and the Observatory into one application. It does not update the existing `adapt-observatory` Site.
+
+The unified left navigation contains:
+
+- the V2-inspired landing page and Georgetown visual system;
+- ADAPT, tradable-services, and manufacturing-trade map views;
+- searchable county selection, matched-peer comparison, downloads, trends, industry and occupation detail;
+- a native Policy Simulator using the V2 repository's four-lever formula and current public V2 county inputs;
+- saved, contextual investigations and evidence-grounded follow-up chat;
+- document and website ingestion, indexed passage inspection, and the peer-policy register; and
+- V2 mission, research, partnership, and in-product Help pages.
+
+The authoritative upstream dashboard source is [`cgsp-georgetown/V2_ADAPT_Dashboard`](https://github.com/cgsp-georgetown/V2_ADAPT_Dashboard). The integration preserves the upstream formula and reads the dashboard's current public data service; the Observatory's conversations, uploaded evidence, and user-scoped investigations continue to use this application's D1/R2 storage and API routes.
+
+### How a current answer is produced
+
+1. The selected counties and active workspace (map, comparison, simulator, or investigation) form the question context.
+2. ADAPT's bundled 2022 county record is available as the descriptive baseline.
+3. The analyst searches only currently indexed evidence passages and retrieves relevant county profiles/policy records through explicit tools.
+4. The selected OpenAI or OpenRouter model drafts a conversational answer under evidence rules that separate observation, sourced claims, interpretation, scenarios, and unknowns.
+5. Saved citations point to the exact indexed passages used. Missing evidence is reported as a gap rather than filled with an invented claim.
+
+The Policy Simulator is a different evidence layer: it fetches raw V2 inputs and formula coefficients, reconstructs V2's standardization constants, then applies the published formula as the user moves export exposure, K–12 spending, downstream exposure, and import competition. Its output is labeled as a scenario, not a forecast or causal estimate.
+
+### Adding a source
+
+Open **Evidence library → Add evidence**. Upload an authorized PDF, DOCX, XLSX, CSV, TXT, or Markdown file, or index one specific public HTTPS page with a user-supplied Firecrawl key. Add title, geographic scope, data/publication period, and limitations; wait for `Indexed`; then use **Inspect** to verify the passages. Files are stored in R2, source metadata and passages in D1, and removal excludes the source from future retrieval. Reference-shelf links are discovery aids and do not become answer evidence until indexed.
+
+### Unified-build verification
+
+```bash
+npm run build
+npx vitest run
+```
+
+The browser regression pass covers the three map measures, map zoom/reset, county search and Shelby–Auglaize re-selection, peer comparison, dark mode, native simulator load/change/reset, investigation submission/error preservation, and a real Markdown upload indexed into a searchable passage. Live model completion additionally requires provider credits; website ingestion requires a Firecrawl key with credits.
+
 ## Latest Observatory update
 
 The unified app includes contextual evidence chat beneath the county map and peer comparison, a source-backed peer-policy register, and searchable **Help & how to use** with a downloadable user guide. See [implementation status and verification](docs/SEPTEMBER17-UPDATE.md) for completed work and remaining simulator/data dependencies. Older deployment documentation below is retained for reference.

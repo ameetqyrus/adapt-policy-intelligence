@@ -31,7 +31,7 @@ describe('evidence-first context contract',()=>{
   });
   it('provides help for every major workflow and accurately labels source limitations',()=>{
     expect(helpSections.map(s=>s.id)).toEqual(expect.arrayContaining(['start','compare','chat','connect','sources','audit','policy','future','save','trouble']));
-    expect(helpSections.find(s=>s.id==='future')?.text).toContain('does not recreate');
+    expect(helpSections.find(s=>s.id==='future')?.text).toContain('V2 ADAPT dashboard’s published four-lever formula');
     expect(helpSections.find(s=>s.id==='audit')?.text).toContain('not indexed evidence');
     expect(new Set(referenceSources.map(s=>s.url)).size).toBe(referenceSources.length);
     expect(referenceSources.some(s=>s.title.includes('Workforce Almanac'))).toBe(true);
